@@ -1,7 +1,8 @@
 /**
  * Created by pyn on 2018/4/2.
  */
-
+import javafx.geometry.Pos;
+import javafx.scene.chart.PieChart;
 import org.apache.flink.api.common.functions.FlatMapFunction;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.java.DataSet;
@@ -13,6 +14,8 @@ import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.util.Collector;
 import www.pyn.bean.Direction;
 import www.pyn.bean.Position;
+import www.pyn.bean.Result;
+import www.pyn.bean.SimilarityTuple;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,15 +28,40 @@ public class Knn {
     private DataSet<Position> testPositionDS;
     private DataSet<Direction> testDirectionDS;
     private PrepareData prepareData;
+
+    private List<Result> trainResult;
+    private List<Result> testResult;
+    private PrepareResult prepareResult;
+
     public Knn() {
         prepareData = PrepareData.getInstance();
         trainPosition = prepareData.getTrainPosition();
         trainDirection = prepareData.getTrainDirection();
         testPositionDS = prepareData.getTestPositionDS();
         testDirectionDS = prepareData.getTestDirectionDS();
+
+        prepareResult = PrepareResult.getInstance();
+        trainResult = prepareResult.getTrainResult();
+        testResult = prepareResult.getTestResult();
     }
     public void test() {
-        System.out.println("YES");
+        List<Position> train = new ArrayList<Position>();
+
+        train.add(new Position(0, 0, 0, 1));
+        train.add(new Position(1, 0, 1, 0));
+        train.add(new Position(2, 1, 0, 0));
+        train.add(new Position(3, 1, 1, 1));
+
+        Position p = new Position(0, 0, 0, 1);
+        SimilarityTuple[] nearestNeighbor = Tools.getNearestNeighbors(train, 3, p);
+        for(int i = 0; i < nearestNeighbor.length; i++) {
+            System.out.println(nearestNeighbor[i].dataId + " " + nearestNeighbor[i].simlarity);
+        }
+//        System.out.println("testResult_size: " + testResult.size());
+//        System.out.println("dataId : " + testResult.get(0).getDataId());
+//        for(int i = 0; i < testResult.get(0).getVisibleObj().size(); i++) {
+//            System.out.println(testResult.get(0).getVisibleObj().get(i) + " ");
+//        }
 //        System.out.println("trainPosition_size: " + trainPosition.size());
 //        System.out.println("trainDirection_size: " + trainDirection.size());
 //        for(int i = 0; i < trainDirection.size(); i++) {

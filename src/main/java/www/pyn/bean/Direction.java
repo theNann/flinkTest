@@ -18,6 +18,11 @@ public class Direction implements Serializable{
         this.dz = pz;
     }
 
+    public double[] getDirection() {
+        double[] d = {dx, dy, dz};
+        return d;
+    }
+
     public int getDataId() {
         return dataId;
     }

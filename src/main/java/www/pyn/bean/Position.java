@@ -18,6 +18,11 @@ public class Position implements Serializable{
         this.pz = pz;
     }
 
+    public double[] getPosition() {
+        double[] p = {px, py, pz};
+        return p;
+    }
+
     public int getDataId() {
         return dataId;
     }

@@ -9,7 +9,7 @@ import www.pyn.bean.Position;
 import java.util.List;
 
 //TODO 添加direction，测试输入数据的正确性（训练集和测试集）(已完成)
-//TODO 从target.txt文件中读取训练集和测试集的结果，建议新建一个类PrepareResult来操作
+//TODO 从target.txt文件中读取训练集和测试集的结果，建议新建一个类PrepareResult来操作（已完成）
 //TODO 之后添加一个工具包，计算两个向量之前的相似度，以及两个集合之间的相似度
 
 @SuppressWarnings("serial")
