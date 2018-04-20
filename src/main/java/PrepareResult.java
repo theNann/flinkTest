@@ -4,28 +4,34 @@ import org.apache.flink.api.java.ExecutionEnvironment;
 import org.apache.flink.util.Collector;
 import www.pyn.bean.Result;
 
+import javax.print.attribute.ResolutionSyntax;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
 /**
  * Created by pyn on 2018/4/17.
  */
 public class PrepareResult {
-    private final ExecutionEnvironment env = ExecutionEnvironment.getExecutionEnvironment();
-    private List<Result> trainResult;
-    private List<Result> testResult;
-    private String trainFilePath = "E:\\BIMRecommed\\input\\target_train.txt";
-    private String testFilePath = "E:\\BIMRecommed\\input\\target_test.txt";
+    private ExecutionEnvironment env;
+    private HashMap<Integer,Result> trainResult;
+    private HashMap<Integer,Result> testResult;
+//    private String trainFilePath = "E:\\BIMRecommed\\input\\target_train.txt";
+//    private String testFilePath = "E:\\BIMRecommed\\input\\target_test.txt";
+    private String trainFilePath = "/home/pyn/Desktop/BIMRecommed/input/target_train.txt";
+    private String testFilePath = "/home/pyn/Desktop/BIMRecommed/input/target_test.txt";
     private static PrepareResult prepareResult = null;
 
-    private PrepareResult() {
+    private PrepareResult(ExecutionEnvironment env) {
+        this.env = env;
         readTrainResult();
         readTestResult();
     }
 
-    public static PrepareResult getInstance() {
+    public static PrepareResult getInstance(ExecutionEnvironment env) {
         if(prepareResult == null) {
-            prepareResult = new PrepareResult();
+            prepareResult = new PrepareResult(env);
         }
         return prepareResult;
     }
@@ -37,7 +43,7 @@ public class PrepareResult {
         this.testResult = readResult(testFilePath);
     }
 
-    public List<Result> readResult(String filePath) {
+    public HashMap<Integer,Result> readResult(String filePath) {
         DataSet<String> lines = env.readTextFile(filePath);
         DataSet<Result> ds = lines.flatMap(new FlatMapFunction<String, Result>() {
             public void flatMap(String s, Collector<Result> collector) throws Exception {
@@ -47,22 +53,27 @@ public class PrepareResult {
                 for(int i = 1; i < split.length; i++) {
                     visibleObj.add(Integer.valueOf(split[i]));
                 }
-                Result result = new Result(dataId, visibleObj);
+                Result result = new Result(dataId, new HashSet<Integer>(visibleObj));
                 collector.collect(result);
             }
         });
         try {
-            return ds.collect();
+            List<Result> rs = ds.collect();
+            HashMap<Integer, Result> hashMap = new HashMap<Integer, Result>();
+            for(int i = 0; i < rs.size(); i++) {
+                hashMap.put(rs.get(i).getDataId(), rs.get(i));
+            }
+            return hashMap;
         } catch (Exception e) {
             e.printStackTrace();
         }
         return null;
     }
-    public List<Result> getTrainResult() {
+    public HashMap<Integer,Result> getTrainResult() {
         return trainResult;
     }
 
-    public List<Result> getTestResult() {
+    public HashMap<Integer,Result> getTestResult() {
         return testResult;
     }
 }

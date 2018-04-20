@@ -1,11 +1,17 @@
 /**
  * Created by pyn on 2018/4/3.
  */
+
+
+import org.apache.flink.api.common.functions.FlatMapFunction;
 import org.apache.flink.api.java.DataSet;
 import org.apache.flink.api.java.ExecutionEnvironment;
+import org.apache.flink.util.Collector;
 import www.pyn.bean.Direction;
 import www.pyn.bean.Position;
+import www.pyn.bean.Result;
 
+import java.util.ArrayList;
 import java.util.List;
 
 //TODO 添加direction，测试输入数据的正确性（训练集和测试集）(已完成)
@@ -14,25 +20,27 @@ import java.util.List;
 
 @SuppressWarnings("serial")
 public class PrepareData {
-    private final ExecutionEnvironment env;
+    private ExecutionEnvironment env;
     private List<Position> trainPosition;
     private List<Direction> trainDirection;
     private DataSet<Position> testPositionDS;
     private DataSet<Direction> testDirectionDS;
-    private String trainFilePath = "E:\\BIMRecommed\\input\\data_train.csv";
-    private String testFilePath = "E:\\BIMRecommed\\input\\data_test.csv";
+//    private String trainFilePath = "E:\\BIMRecommed\\input\\data_train.csv";
+//    private String testFilePath = "E:\\BIMRecommed\\input\\data_test.csv";
+    private String trainFilePath = "/home/pyn/Desktop/BIMRecommed/input/data_train.csv";
+    private String testFilePath = "/home/pyn/Desktop/BIMRecommed/input/data_test.csv";
     private static PrepareData prepareData = null;
-    private PrepareData() {
-        env = ExecutionEnvironment.getExecutionEnvironment();
+    private PrepareData(ExecutionEnvironment env) {
+        this.env  = env;
         readTrainPosition();
         readTestPosition();
         readTrainDirection();
         readTestDirection();
     }
 
-    public static PrepareData getInstance() {
+    public static PrepareData getInstance(ExecutionEnvironment env) {
         if(prepareData == null) {
-            prepareData = new PrepareData();
+            prepareData = new PrepareData(env);
         } else {
             return prepareData;
         }
@@ -43,6 +51,7 @@ public class PrepareData {
         DataSet<Position> trainPositionDataSet = env.readCsvFile(trainFilePath)
                 .includeFields("1111000000")
                 .pojoType(Position.class, "dataId", "px", "py", "pz");
+
         try {
             this.trainPosition = trainPositionDataSet.collect();
         } catch (Exception e) {
@@ -62,9 +71,24 @@ public class PrepareData {
     }
 
     public void readTestPosition() {
-        this.testPositionDS = env.readCsvFile(testFilePath)
+        System.out.println("PrepareData_readTestPosition!");
+        this.testPositionDS =
+                env.readCsvFile(testFilePath)
                 .includeFields("1111000000")
                 .pojoType(Position.class, "dataId", "px", "py", "pz");
+
+//        DataSet<Result> rs = testPositionDS.flatMap(new FlatMapFunction<Position, Result>() {
+//                    public void flatMap(Position position, Collector<Result> collector) throws Exception {
+//                        int dataId = position.getDataId();
+//                        System.out.println("dataId : " + dataId);
+//                        collector.collect(new Result(dataId, new ArrayList<Integer>()));
+//                    }
+//                });
+//        try {
+//            rs.print();
+//        } catch (Exception e) {
+//
+//        }
     }
 
     public void readTestDirection() {

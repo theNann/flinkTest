@@ -1,14 +1,15 @@
 package www.pyn.bean;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by pyn on 2018/4/18.
  */
 public class Result {
     private int dataId;
-    private List<Integer> visibleObj;
-    public Result(int dataId, List<Integer> visibleObj) {
+    private Set<Integer> visibleObj;
+    public Result(int dataId, Set<Integer> visibleObj) {
         this.dataId = dataId;
         this.visibleObj = visibleObj;
     }
@@ -17,7 +18,7 @@ public class Result {
         return dataId;
     }
 
-    public List<Integer> getVisibleObj() {
+    public Set<Integer> getVisibleObj() {
         return visibleObj;
     }
 
@@ -25,7 +26,15 @@ public class Result {
         this.dataId = dataId;
     }
 
-    public void setVisibleObj(List<Integer> visibleObj) {
+    public void setVisibleObj(Set<Integer> visibleObj) {
         this.visibleObj = visibleObj;
+    }
+
+    @Override
+    public String toString() {
+        return "Result{" +
+                "dataId=" + dataId +
+                ", visibleObj=" + visibleObj +
+                '}';
     }
 }

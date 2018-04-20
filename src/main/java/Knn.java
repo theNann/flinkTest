@@ -1,24 +1,24 @@
 /**
  * Created by pyn on 2018/4/2.
  */
-import javafx.geometry.Pos;
-import javafx.scene.chart.PieChart;
 import org.apache.flink.api.common.functions.FlatMapFunction;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.java.DataSet;
 import org.apache.flink.api.java.ExecutionEnvironment;
 import org.apache.flink.api.java.io.LocalCollectionOutputFormat;
 import org.apache.flink.api.java.tuple.Tuple2;
+import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.api.java.tuple.Tuple4;
 import org.apache.flink.api.java.utils.ParameterTool;
+import org.apache.flink.core.fs.FileSystem;
 import org.apache.flink.util.Collector;
+import org.omg.CORBA.Environment;
 import www.pyn.bean.Direction;
 import www.pyn.bean.Position;
 import www.pyn.bean.Result;
 import www.pyn.bean.SimilarityTuple;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @SuppressWarnings("serial")
 
@@ -29,35 +29,49 @@ public class Knn {
     private DataSet<Direction> testDirectionDS;
     private PrepareData prepareData;
 
-    private List<Result> trainResult;
-    private List<Result> testResult;
+    private static HashMap<Integer,Result> trainResult;
+    private static HashMap<Integer,Result> testResult;
     private PrepareResult prepareResult;
 
-    public Knn() {
-        prepareData = PrepareData.getInstance();
+    private String[] args;
+    private ExecutionEnvironment env;
+    private ParameterTool params;
+
+    public Knn(String[] args) {
+        this.args = args;
+        params = ParameterTool.fromArgs(args);
+        env = ExecutionEnvironment.getExecutionEnvironment();
+        env.getConfig().setGlobalJobParameters(params);
+
+        prepareData = PrepareData.getInstance(env);
         trainPosition = prepareData.getTrainPosition();
         trainDirection = prepareData.getTrainDirection();
         testPositionDS = prepareData.getTestPositionDS();
         testDirectionDS = prepareData.getTestDirectionDS();
 
-        prepareResult = PrepareResult.getInstance();
+        prepareResult = PrepareResult.getInstance(env);
         trainResult = prepareResult.getTrainResult();
         testResult = prepareResult.getTestResult();
     }
     public void test() {
-        List<Position> train = new ArrayList<Position>();
-
-        train.add(new Position(0, 0, 0, 1));
-        train.add(new Position(1, 0, 1, 0));
-        train.add(new Position(2, 1, 0, 0));
-        train.add(new Position(3, 1, 1, 1));
-
-        Position p = new Position(0, 0, 0, 1);
-        SimilarityTuple[] nearestNeighbor = Tools.getNearestNeighbors(train, 3, p);
-        for(int i = 0; i < nearestNeighbor.length; i++) {
-            System.out.println(nearestNeighbor[i].dataId + " " + nearestNeighbor[i].simlarity);
-        }
+//        List<Position> train = new ArrayList<Position>();
+//
+//        train.add(new Position(0, 0, 0, 1));
+//        train.add(new Position(1, 0, 1, 0));
+//        train.add(new Position(2, 1, 0, 0));
+//        train.add(new Position(3, 1, 1, 1));
+//
+//        Position p = new Position(0, 0, 0, 1);
+//        SimilarityTuple[] nearestNeighbor = Tools.getNearestNeighbors(train, 3, p);
+//        for(int i = 0; i < nearestNeighbor.length; i++) {
+//            System.out.println(nearestNeighbor[i].dataId + " " + nearestNeighbor[i].simlarity);
+//        }
 //        System.out.println("testResult_size: " + testResult.size());
+//        Result rs = testResult.get(0);
+//        for(int i = 0; i < rs.getVisibleObj().size(); i++) {
+//            System.out.println(rs.getVisibleObj().);
+//        }
+//        System.out.println("trainResult_size: " + trainResult.size());
 //        System.out.println("dataId : " + testResult.get(0).getDataId());
 //        for(int i = 0; i < testResult.get(0).getVisibleObj().size(); i++) {
 //            System.out.println(testResult.get(0).getVisibleObj().get(i) + " ");
@@ -68,15 +82,58 @@ public class Knn {
 //            System.out.println(trainDirection.get(i) + "//////////////////////");
 //        }
     }
-//    public void solveKnn() {
-//        DataSet<Tuple2<Integer,List<Tuple2<Integer,Double>>>> ans = testPositionDS.flatMap(new knnMap());
-//        try {
-//            ans.print();
-//        } catch (Exception e) {
-//            e.printStackTrace();
+    public void solveKnn() {
+        DataSet<Result> ans = testPositionDS.flatMap(new knnMap());
+//        if (params.has("output")) {
+//            System.out.println("output : " + params.get("output"));
+//            ans.writeAsText(params.get("output"),FileSystem.WriteMode.OVERWRITE);
+//            try {
+//                env.execute("Knn");
+//            } catch (Exception e) {}
+//        } else {
+//            System.out.println("Printing result to stdout. Use --output to specify output path.");
+//            try {
+//                ans.print();
+//            } catch (Exception e) {}
 //        }
-//    }
 
+        DataSet<Tuple3<Integer, Double, Double>> scores = ans.flatMap(new scoreMap());
+        scores.writeAsCsv("/home/pyn/Desktop/BIMRecommed/output/flinkTestScores.csv","\n",",")
+                .setParallelism(1);
+        try {
+            env.execute("Scores");
+        } catch (Exception e) {}
+    }
+
+    public static final class scoreMap implements FlatMapFunction<Result, Tuple3<Integer,Double, Double>> {
+        public void flatMap(Result result, Collector<Tuple3<Integer, Double, Double>> collector) throws Exception {
+            int dataId = result.getDataId();
+            Set<Integer> preditcVisibleObj = result.getVisibleObj();
+            Set<Integer> targetVisibleObj = testResult.get(dataId).getVisibleObj();
+            int jiaoSize = Tools.intersection(preditcVisibleObj, targetVisibleObj);
+            double acc = jiaoSize*1.0 / preditcVisibleObj.size();
+            double recall = jiaoSize*1.0 / targetVisibleObj.size();
+            collector.collect(new Tuple3<Integer, Double, Double>(dataId, acc, recall));
+        }
+    }
+
+    public static final class knnMap implements FlatMapFunction<Position, Result> {
+        public void flatMap(Position position, Collector<Result> collector) throws Exception {
+            int dataId = position.getDataId();
+//            System.out.println("testDataId : " + dataId);
+            Set<Integer> visibleObjSet = new HashSet<Integer>();
+            visibleObjSet.clear();
+            int k = 5;
+            SimilarityTuple[] kNearestNeighbors = Tools.getNearestNeighbors(trainPosition, k, position);
+            for(int i = 0; i < k; i++) {
+                int simId = kNearestNeighbors[i].dataId;
+//                System.out.println("dataId : " + dataId + " " + simId);
+                Result rs = trainResult.get(simId);
+                visibleObjSet.addAll(rs.getVisibleObj());
+            }
+            collector.collect(new Result(dataId,visibleObjSet));
+        }
+    }
 
     public static List<Position> getTrainPosition() {
         return trainPosition;
@@ -111,9 +168,9 @@ public class Knn {
     }
 
     public static void main(String[] args) throws Exception {
-        Knn knn = new Knn();
-//        knn.solveKnn();
-        knn.test();
+        Knn knn = new Knn(args);
+        knn.solveKnn();
+//        knn.test();
 //        final ParameterTool params = ParameterTool.fromArgs(args);
 //        // set up the execution environment
 //        final ExecutionEnvironment env = ExecutionEnvironment.getExecutionEnvironment();
@@ -160,17 +217,6 @@ public class Knn {
 //            counts.print();
 //        }
     }
-    public static final class knnMap implements FlatMapFunction<Position, Tuple2<Integer, List<Tuple2<Integer,Double>>>> {
-        public void flatMap(Position position, Collector<Tuple2<Integer, List<Tuple2<Integer,Double>>>> collector) throws Exception {
-            double sum = position.getPx() + position.getPy() + position.getPz();
-            List<Tuple2<Integer,Double>> ans = new ArrayList<Tuple2<Integer, Double>>();
-            for(int i = 0; i < trainPosition.size(); i++) {
-                double sum_tmp = trainPosition.get(i).getPx() + trainPosition.get(i).getPy() + trainPosition.get(i).getPz();
-                int id_tmp = trainPosition.get(i).getDataId();
-                ans.add(new Tuple2<Integer,Double>(id_tmp, sum_tmp-sum));
-            }
-            collector.collect(new Tuple2<Integer, List<Tuple2<Integer,Double>>>(position.getDataId(), ans));
-        }
-    }
+
 
 }

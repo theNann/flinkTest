@@ -20,9 +20,15 @@ public class Tools {
         return 0.5 + 0.5 * cos;
     }
 
-    public static double setSimilarity(List<Integer> l1, List<Integer> l2) {
-        Set<Integer> set1 = new HashSet<Integer>(l1);
-        Set<Integer> set2 = new HashSet<Integer>(l2);
+    public static int intersection(Set<Integer> set1, Set<Integer> set2) {
+        Set<Integer> jiao = new HashSet<Integer>();
+        jiao.clear();
+        jiao.addAll(set1);
+        jiao.retainAll(set2);
+        return jiao.size();
+    }
+
+    public static double setSimilarity(Set<Integer> set1, Set<Integer> set2) {
         Set<Integer> jiao = new HashSet<Integer>();
         jiao.clear();
         jiao.addAll(set1);
