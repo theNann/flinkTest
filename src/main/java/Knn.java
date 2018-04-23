@@ -13,20 +13,16 @@ import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.core.fs.FileSystem;
 import org.apache.flink.util.Collector;
 import org.omg.CORBA.Environment;
-import www.pyn.bean.Direction;
-import www.pyn.bean.Position;
-import www.pyn.bean.Result;
-import www.pyn.bean.SimilarityTuple;
+import www.pyn.bean.*;
 
 import java.util.*;
 
 @SuppressWarnings("serial")
 
 public class Knn {
-    private static List<Position> trainPosition;
-    private static List<Direction> trainDirection;
-    private DataSet<Position> testPositionDS;
-    private DataSet<Direction> testDirectionDS;
+    private static HashMap<Integer, Position> trainPosition;
+    private static HashMap<Integer, Direction> trainDirection;
+    private DataSet<PrimitiveData> testDataDS;
     private PrepareData prepareData;
 
     private static HashMap<Integer,Result> trainResult;
@@ -46,14 +42,14 @@ public class Knn {
         prepareData = PrepareData.getInstance(env);
         trainPosition = prepareData.getTrainPosition();
         trainDirection = prepareData.getTrainDirection();
-        testPositionDS = prepareData.getTestPositionDS();
-        testDirectionDS = prepareData.getTestDirectionDS();
+        testDataDS = prepareData.getTestDataDS();
 
         prepareResult = PrepareResult.getInstance(env);
         trainResult = prepareResult.getTrainResult();
         testResult = prepareResult.getTestResult();
     }
     public void test() {
+        System.out.println(trainPosition.size() + " " + trainDirection.size());
 //        List<Position> train = new ArrayList<Position>();
 //
 //        train.add(new Position(0, 0, 0, 1));
@@ -83,7 +79,7 @@ public class Knn {
 //        }
     }
     public void solveKnn() {
-        DataSet<Result> ans = testPositionDS.flatMap(new knnMap());
+        DataSet<Result> ans = testDataDS.flatMap(new knnMap());
 //        if (params.has("output")) {
 //            System.out.println("output : " + params.get("output"));
 //            ans.writeAsText(params.get("output"),FileSystem.WriteMode.OVERWRITE);
@@ -98,7 +94,7 @@ public class Knn {
 //        }
 
         DataSet<Tuple3<Integer, Double, Double>> scores = ans.flatMap(new scoreMap());
-        scores.writeAsCsv("/home/pyn/Desktop/BIMRecommed/output/flinkTestScores.csv","\n",",")
+        scores.writeAsCsv("/home/pyn/Desktop/BIMRecommed/output/flinkTestScores.csv","\n",",", FileSystem.WriteMode.OVERWRITE)
                 .setParallelism(1);
         try {
             env.execute("Scores");
@@ -117,14 +113,17 @@ public class Knn {
         }
     }
 
-    public static final class knnMap implements FlatMapFunction<Position, Result> {
-        public void flatMap(Position position, Collector<Result> collector) throws Exception {
-            int dataId = position.getDataId();
+    public static final class knnMap implements FlatMapFunction<PrimitiveData, Result> {
+        public void flatMap(PrimitiveData primitiveData, Collector<Result> collector) throws Exception {
+            int dataId = primitiveData.getDataId();
+            Position position = primitiveData.getPosition();
+            Direction direction = primitiveData.getDirection();
 //            System.out.println("testDataId : " + dataId);
             Set<Integer> visibleObjSet = new HashSet<Integer>();
             visibleObjSet.clear();
             int k = 5;
-            SimilarityTuple[] kNearestNeighbors = Tools.getNearestNeighbors(trainPosition, k, position);
+            SimilarityTuple[] kNearestNeighbors = Tools.getNearestNeighbors(trainPosition, position, k,
+                    true, 15, trainDirection, direction);
             for(int i = 0; i < k; i++) {
                 int simId = kNearestNeighbors[i].dataId;
 //                System.out.println("dataId : " + dataId + " " + simId);
@@ -135,36 +134,28 @@ public class Knn {
         }
     }
 
-    public static List<Position> getTrainPosition() {
+    public static HashMap<Integer, Position> getTrainPosition() {
         return trainPosition;
     }
 
-    public static void setTrainPosition(List<Position> trainPosition) {
+    public static void setTrainPosition(HashMap<Integer, Position> trainPosition) {
         Knn.trainPosition = trainPosition;
     }
 
-    public static List<Direction> getTrainDirection() {
+    public static HashMap<Integer, Direction> getTrainDirection() {
         return trainDirection;
     }
 
-    public static void setTrainDirection(List<Direction> trainDirection) {
+    public static void setTrainDirection(HashMap<Integer, Direction> trainDirection) {
         Knn.trainDirection = trainDirection;
     }
 
-    public DataSet<Position> getTestPositionDS() {
-        return testPositionDS;
+    public DataSet<PrimitiveData> getTestDataDS() {
+        return testDataDS;
     }
 
-    public void setTestPositionDS(DataSet<Position> testPositionDS) {
-        this.testPositionDS = testPositionDS;
-    }
-
-    public DataSet<Direction> getTestDirectionDS() {
-        return testDirectionDS;
-    }
-
-    public void setTestDirectionDS(DataSet<Direction> testDirectionDS) {
-        this.testDirectionDS = testDirectionDS;
+    public void setTestDataDS(DataSet<PrimitiveData> testDataDS) {
+        this.testDataDS = testDataDS;
     }
 
     public static void main(String[] args) throws Exception {

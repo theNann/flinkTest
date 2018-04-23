@@ -9,9 +9,11 @@ import org.apache.flink.api.java.ExecutionEnvironment;
 import org.apache.flink.util.Collector;
 import www.pyn.bean.Direction;
 import www.pyn.bean.Position;
+import www.pyn.bean.PrimitiveData;
 import www.pyn.bean.Result;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 //TODO 添加direction，测试输入数据的正确性（训练集和测试集）(已完成)
@@ -21,10 +23,9 @@ import java.util.List;
 @SuppressWarnings("serial")
 public class PrepareData {
     private ExecutionEnvironment env;
-    private List<Position> trainPosition;
-    private List<Direction> trainDirection;
-    private DataSet<Position> testPositionDS;
-    private DataSet<Direction> testDirectionDS;
+    private HashMap<Integer, Position> trainPosition;
+    private HashMap<Integer, Direction> trainDirection;
+    private DataSet<PrimitiveData> testDataDS;
 //    private String trainFilePath = "E:\\BIMRecommed\\input\\data_train.csv";
 //    private String testFilePath = "E:\\BIMRecommed\\input\\data_test.csv";
     private String trainFilePath = "/home/pyn/Desktop/BIMRecommed/input/data_train.csv";
@@ -32,10 +33,11 @@ public class PrepareData {
     private static PrepareData prepareData = null;
     private PrepareData(ExecutionEnvironment env) {
         this.env  = env;
+        trainPosition = new HashMap<Integer, Position>();
+        trainDirection = new HashMap<Integer, Direction>();
         readTrainPosition();
-        readTestPosition();
         readTrainDirection();
-        readTestDirection();
+        readTestData();
     }
 
     public static PrepareData getInstance(ExecutionEnvironment env) {
@@ -53,10 +55,17 @@ public class PrepareData {
                 .pojoType(Position.class, "dataId", "px", "py", "pz");
 
         try {
-            this.trainPosition = trainPositionDataSet.collect();
+            List<Position> list = trainPositionDataSet.collect();
+            trainPosition.clear();
+            for(int i = 0; i < list.size(); i++) {
+                int dataId = list.get(i).getDataId();
+                Position position = list.get(i);
+                trainPosition.put(dataId, position);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
+//        System.out.println("PrepareData trainPosition size : " + trainPosition.size());
     }
 
     public void readTrainDirection() {
@@ -64,18 +73,22 @@ public class PrepareData {
                 .includeFields("1000111000")
                 .pojoType(Direction.class, "dataId", "dx", "dy", "dz");
         try {
-            this.trainDirection = trainDirectionDataSet.collect();
+            List<Direction> list = trainDirectionDataSet.collect();
+            trainDirection.clear();
+            for(int i = 0; i < list.size(); i++) {
+                int dataId = list.get(i).getDataId();
+                trainDirection.put(dataId, list.get(i));
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public void readTestPosition() {
-        System.out.println("PrepareData_readTestPosition!");
-        this.testPositionDS =
-                env.readCsvFile(testFilePath)
-                .includeFields("1111000000")
-                .pojoType(Position.class, "dataId", "px", "py", "pz");
+    public void readTestData() {
+//        System.out.println("PrepareData_readTestPosition!");
+        this.testDataDS = env.readCsvFile(testFilePath)
+                .includeFields("1111111000")
+                .pojoType(PrimitiveData.class, "dataId", "px", "py", "pz", "dx", "dy", "dz");
 
 //        DataSet<Result> rs = testPositionDS.flatMap(new FlatMapFunction<Position, Result>() {
 //                    public void flatMap(Position position, Collector<Result> collector) throws Exception {
@@ -91,30 +104,20 @@ public class PrepareData {
 //        }
     }
 
-    public void readTestDirection() {
-        this.testDirectionDS = env.readCsvFile(testFilePath)
-                .includeFields("1000111000")
-                .pojoType(Direction.class, "dataId", "dx", "dy", "dz");
-    }
-
     public ExecutionEnvironment getEnv() {
         return env;
     }
 
-    public List<Position> getTrainPosition() {
+    public HashMap<Integer, Position> getTrainPosition() {
         return trainPosition;
     }
 
-    public DataSet<Position> getTestPositionDS() {
-        return testPositionDS;
-    }
-
-    public List<Direction> getTrainDirection() {
+    public HashMap<Integer, Direction> getTrainDirection() {
         return trainDirection;
     }
 
-    public DataSet<Direction> getTestDirectionDS() {
-        return testDirectionDS;
+    public DataSet<PrimitiveData> getTestDataDS() {
+        return testDataDS;
     }
 
     public String getTrainFilePath() {

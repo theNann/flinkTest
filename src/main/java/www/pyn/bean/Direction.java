@@ -11,11 +11,11 @@ public class Direction implements Serializable{
     double dy;
     double dz;
     public Direction(){}
-    public Direction(int data_id, double px, double py, double pz) {
+    public Direction(int data_id, double dx, double dy, double dz) {
         this.dataId = data_id;
-        this.dx = px;
-        this.dy = py;
-        this.dz = pz;
+        this.dx = dx;
+        this.dy = dy;
+        this.dz = dz;
     }
 
     public double[] getDirection() {
