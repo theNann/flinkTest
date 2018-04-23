@@ -5,10 +5,7 @@ import org.apache.flink.util.Collector;
 import www.pyn.bean.Result;
 
 import javax.print.attribute.ResolutionSyntax;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by pyn on 2018/4/17.
@@ -25,6 +22,8 @@ public class PrepareResult {
 
     private PrepareResult(ExecutionEnvironment env) {
         this.env = env;
+        trainResult = new HashMap<Integer, Result>();
+        testResult = new HashMap<Integer, Result>();
         readTrainResult();
         readTestResult();
     }
@@ -49,7 +48,7 @@ public class PrepareResult {
             public void flatMap(String s, Collector<Result> collector) throws Exception {
                 String[] split = s.split(", ");
                 int dataId = Integer.valueOf(split[0]);
-                List<Integer> visibleObj = new ArrayList<Integer>();
+                Set<Integer> visibleObj = new HashSet<Integer>();
                 for(int i = 1; i < split.length; i++) {
                     visibleObj.add(Integer.valueOf(split[i]));
                 }

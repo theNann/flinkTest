@@ -49,7 +49,11 @@ public class Knn {
         testResult = prepareResult.getTestResult();
     }
     public void test() {
-        System.out.println(trainPosition.size() + " " + trainDirection.size());
+        System.out.println("train " + trainPosition.size() + " " + trainDirection.size() + " " + trainResult.size());
+        System.out.println("test " + testResult.size());
+        for(Map.Entry<Integer,Result> entry : testResult.entrySet()) {
+            System.out.println(entry.getValue());
+        }
 //        List<Position> train = new ArrayList<Position>();
 //
 //        train.add(new Position(0, 0, 0, 1));
@@ -94,10 +98,10 @@ public class Knn {
 //        }
 
         DataSet<Tuple3<Integer, Double, Double>> scores = ans.flatMap(new scoreMap());
-        scores.writeAsCsv("/home/pyn/Desktop/BIMRecommed/output/flinkTestScores.csv","\n",",", FileSystem.WriteMode.OVERWRITE)
+        scores.writeAsCsv("/home/pyn/Desktop/BIMRecommed/output/flinkScores.csv","\n",",")
                 .setParallelism(1);
         try {
-            env.execute("Scores");
+            env.execute("FlinkScores");
         } catch (Exception e) {}
     }
 
@@ -123,7 +127,7 @@ public class Knn {
             visibleObjSet.clear();
             int k = 5;
             SimilarityTuple[] kNearestNeighbors = Tools.getNearestNeighbors(trainPosition, position, k,
-                    true, 15, trainDirection, direction);
+                    false, 15, trainDirection, direction);
             for(int i = 0; i < k; i++) {
                 int simId = kNearestNeighbors[i].dataId;
 //                System.out.println("dataId : " + dataId + " " + simId);
