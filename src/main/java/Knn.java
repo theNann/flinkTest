@@ -51,9 +51,10 @@ public class Knn {
     public void test() {
         System.out.println("train " + trainPosition.size() + " " + trainDirection.size() + " " + trainResult.size());
         System.out.println("test " + testResult.size());
-        for(Map.Entry<Integer,Result> entry : testResult.entrySet()) {
-            System.out.println(entry.getValue());
-        }
+//        for(Map.Entry<Integer,Direction> entry : trainDirection.entrySet()) {
+//            System.out.println(entry.getKey() + " " + entry.getValue());
+//        }
+
 //        List<Position> train = new ArrayList<Position>();
 //
 //        train.add(new Position(0, 0, 0, 1));
@@ -122,15 +123,16 @@ public class Knn {
             int dataId = primitiveData.getDataId();
             Position position = primitiveData.getPosition();
             Direction direction = primitiveData.getDirection();
-//            System.out.println("testDataId : " + dataId);
+//            System.out.println("testDataId : " + dataId + " " + position + " " + direction);
             Set<Integer> visibleObjSet = new HashSet<Integer>();
             visibleObjSet.clear();
-            int k = 5;
-            SimilarityTuple[] kNearestNeighbors = Tools.getNearestNeighbors(trainPosition, position, k,
-                    false, 15, trainDirection, direction);
-            for(int i = 0; i < k; i++) {
-                int simId = kNearestNeighbors[i].dataId;
-//                System.out.println("dataId : " + dataId + " " + simId);
+            int k = 3;
+            List<SimilarityTuple> kNearestNeighbors = Tools.getNearestNeighbors(trainPosition, position, k,
+                    1, 15, trainDirection, direction);
+
+            for(int i = 0; i < kNearestNeighbors.size(); i++) {
+                int simId = kNearestNeighbors.get(i).dataId;
+//                System.out.println(dataId + " " + simId + " " + kNearestNeighbors[i].simlarity);
                 Result rs = trainResult.get(simId);
                 visibleObjSet.addAll(rs.getVisibleObj());
             }
@@ -165,7 +167,7 @@ public class Knn {
     public static void main(String[] args) throws Exception {
         Knn knn = new Knn(args);
         knn.solveKnn();
-//        knn.test();
+        knn.test();
 //        final ParameterTool params = ParameterTool.fromArgs(args);
 //        // set up the execution environment
 //        final ExecutionEnvironment env = ExecutionEnvironment.getExecutionEnvironment();
