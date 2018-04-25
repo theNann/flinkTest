@@ -3,6 +3,7 @@ import org.apache.commons.math3.linear.ArrayRealVector;
 import org.omg.CORBA.INTERNAL;
 import www.pyn.bean.Direction;
 import www.pyn.bean.Position;
+import www.pyn.bean.Result;
 import www.pyn.bean.SimilarityTuple;
 
 import java.util.*;
@@ -41,6 +42,9 @@ public class Tools {
     }
 
     public static double setSimilarity(Set<Integer> set1, Set<Integer> set2) {
+        if(set1.size() == 0 && set2.size() == 0) {
+            return 0;
+        }
         Set<Integer> jiao = new HashSet<Integer>();
         jiao.clear();
         jiao.addAll(set1);
@@ -52,6 +56,20 @@ public class Tools {
         return jiao.size()*1.0 / bing.size();
     }
 
+    public static List<SimilarityTuple> listSort(List<SimilarityTuple> list) {
+        Collections.sort(list, new Comparator<SimilarityTuple>() {
+            public int compare(SimilarityTuple o1, SimilarityTuple o2) {
+                if(o2.similarityP > o1.similarityP) {
+                    return 1;
+                } else if(o2.similarityP == o1.similarityP){
+                    return 0;
+                } else {
+                    return -1;
+                }
+            }
+        });
+        return list;
+    }
     public static List<SimilarityTuple> getNearestNeighbors(HashMap<Integer, Position> trainPosition, Position position,
                            int minK, int considerDirectiton, int maxK, HashMap<Integer, Direction>trainDirection,
                                                         Direction direction) {
@@ -61,15 +79,7 @@ public class Tools {
             double sim = Tools.euclideanDistanceSim(entry.getValue().getPosition(), position.getPosition());
             similarityTuples.add(new SimilarityTuple(dataId, sim));
         }
-        Collections.sort(similarityTuples, new Comparator<SimilarityTuple>() {
-            public int compare(SimilarityTuple o1, SimilarityTuple o2) {
-                if(o2.similarityP > o1.similarityP) {
-                    return 1;
-                } else {
-                    return -1;
-                }
-            }
-        });
+        similarityTuples = Tools.listSort(similarityTuples);
         int kk;
         if(considerDirectiton == 1) {
             kk = maxK;
@@ -119,5 +129,19 @@ public class Tools {
             }
             return res;
         }
+    }
+
+    public static List<SimilarityTuple> userBasedRecommend(HashMap<Integer, Result> trainResult, Set<Integer> predictVisibleObj,
+                                                           int topK) {
+        List<SimilarityTuple> userSimilarity = new ArrayList<SimilarityTuple>();
+        for(Map.Entry<Integer, Result> entry : trainResult.entrySet()) {
+            int dataId = entry.getKey();
+            Set<Integer> visibleObj = entry.getValue().getVisibleObj();
+            double sim = Tools.setSimilarity(predictVisibleObj, visibleObj);
+            //当只有一个sim时调用第一个构造函数，虽然是similarityP，这里也可认为是结果集合的相似性
+            userSimilarity.add(new SimilarityTuple(dataId, sim));
+        }
+        userSimilarity = Tools.listSort(userSimilarity);
+        return userSimilarity.subList(0, topK);
     }
 }

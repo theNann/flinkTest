@@ -18,7 +18,7 @@ import www.pyn.bean.*;
 import java.util.*;
 
 @SuppressWarnings("serial")
-
+// 目前使用Knn-8的方法
 public class Knn {
     private static HashMap<Integer, Position> trainPosition;
     private static HashMap<Integer, Direction> trainDirection;
@@ -29,15 +29,12 @@ public class Knn {
     private static HashMap<Integer,Result> testResult;
     private PrepareResult prepareResult;
 
-    private String[] args;
     private ExecutionEnvironment env;
     private ParameterTool params;
 
-    public Knn(String[] args) {
-        this.args = args;
-        params = ParameterTool.fromArgs(args);
-        env = ExecutionEnvironment.getExecutionEnvironment();
-        env.getConfig().setGlobalJobParameters(params);
+    public Knn(ParameterTool params, ExecutionEnvironment env) {
+        this.params = params;
+        this.env = env;
 
         prepareData = PrepareData.getInstance(env);
         trainPosition = prepareData.getTrainPosition();
@@ -162,57 +159,6 @@ public class Knn {
 
     public void setTestDataDS(DataSet<PrimitiveData> testDataDS) {
         this.testDataDS = testDataDS;
-    }
-
-    public static void main(String[] args) throws Exception {
-        Knn knn = new Knn(args);
-        knn.solveKnn();
-        knn.test();
-//        final ParameterTool params = ParameterTool.fromArgs(args);
-//        // set up the execution environment
-//        final ExecutionEnvironment env = ExecutionEnvironment.getExecutionEnvironment();
-//
-//        // make parameters available in the web interface
-//        env.getConfig().setGlobalJobParameters(params);
-//
-//        List<Position> trainPosition = null;
-//        System.out.println("Input!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-//
-//        DataSet<Position> dataTrainPositionDataSet = env.readCsvFile("E:\\pyn_playground\\flink_data.csv")
-//                .pojoType(Position.class, "dataId", "px", "py", "pz");
-//        trainPosition = dataTrainPositionDataSet.collect();
-        // 也可以通过如下方式得到dataTrainPosition，即先读为Tuple4，然后通过map转化为Dataset<position>
-//        final DataSet<Tuple4<Integer,Integer,Integer,Integer>> dataTrainPositionDataSet =
-//                env.readCsvFile("E:\\pyn_playground\\flink_data.csv").
-//                types(Integer.class, Integer.class, Integer.class, Integer.class);
-
-//        trainPosition = dataTrainPositionDataSet.flatMap(new FlatMapFunction<Tuple4<Integer,Integer,Integer,Integer>, Position>() {
-//            public void flatMap(Tuple4<Integer,Integer,Integer,Integer> tuple4, Collector<Position> out) {
-//                out.collect(new Position(tuple4.f0, tuple4.f1, tuple4.f2, tuple4.f3));
-//                System.out.println(tuple4.f0 +" " + tuple4.f1 + " " + tuple4.f2 + " " + tuple4.f3 + "MAPPPPPPPPPPPPPP");
-//            }
-//        }).collect();
-
-
-
-
-
-//        DataSet<String> text = env.fromElements("hello world");
-//        DataSet<Tuple2<String, Integer>> counts =
-//                // split up the lines in pairs (2-tuples) containing: (word,1)
-//                text.flatMap(new SocketWordCount.Tokenizer())
-//                        // group by the tuple field "0" and sum up tuple field "1"
-//                        .groupBy(0)
-//                        .sum(1);
-//
-//        if (params.has("output")) {
-//            counts.writeAsCsv(params.get("output"), "\n", " ");
-//            // execute program
-//            env.execute("Knn");
-//        } else {
-//            System.out.println("Printing result to stdout. Use --output to specify output path.");
-//            counts.print();
-//        }
     }
 
 
