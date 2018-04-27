@@ -133,16 +133,30 @@ public class Tools {
 
     public static List<SimilarityTuple> userBasedRecommend(HashMap<Integer, Result> trainResult, Set<Integer> predictVisibleObj,
                                                            int howMany) {
-        List<SimilarityTuple> userSimilarity = new ArrayList<SimilarityTuple>();
+        MinHeap minHeap = new MinHeap(howMany);
+        int count = 0;
         for(Map.Entry<Integer, Result> entry : trainResult.entrySet()) {
             int dataId = entry.getKey();
             Set<Integer> visibleObj = entry.getValue().getVisibleObj();
             double sim = Tools.setSimilarity(predictVisibleObj, visibleObj);
             //当只有一个sim时调用第一个构造函数，虽然是similarityP，这里也可认为是结果集合的相似性
-            userSimilarity.add(new SimilarityTuple(dataId, sim));
+            if(count < howMany) {
+                minHeap.add(new SimilarityTuple(dataId, sim));
+            } else if(count == howMany) {
+                minHeap.buildHeap();
+            } else {
+                if(sim > minHeap.arr[0].similarityP) {
+                    minHeap.arr[0] = new SimilarityTuple(dataId, sim);
+                    minHeap.adjustHeap(0);
+                }
+            }
+            count += 1;
         }
-        userSimilarity = Tools.listSort(userSimilarity);
-        return userSimilarity.subList(0, howMany);
+        List<SimilarityTuple> userSimilarity = new ArrayList<SimilarityTuple>();
+        for(int i = 0; i < minHeap.arr.length; i++) {
+            userSimilarity.add(minHeap.arr[i]);
+        }
+        return userSimilarity;
     }
 
     public static double calF1(double acc, double recall) {

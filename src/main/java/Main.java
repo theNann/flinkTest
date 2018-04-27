@@ -1,5 +1,7 @@
+import org.apache.commons.math3.analysis.function.Min;
 import org.apache.flink.api.java.ExecutionEnvironment;
 import org.apache.flink.api.java.utils.ParameterTool;
+import www.pyn.bean.SimilarityTuple;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,6 +30,31 @@ public class Main {
 //            double res = Tools.calF(list.get(i).acc, list.get(i).recall);
 //            System.out.println("res : " + res);
 //        }
+//        MinHeap minHeap = new MinHeap(3);
+//        for(int i = 0; i < 3; i++) {
+//            minHeap.add(new SimilarityTuple(i, i*0.1));
+//        }
+//        minHeap.buildHeap();
+//
+//        for(int i = 0; i < minHeap.arr.length; i++) {
+//            System.out.println(minHeap.arr[i].dataId + " " + minHeap.arr[i].similarityP);
+//        }
+//        System.out.println();
+//
+//        for(int i = 3; i < 7; i++) {
+//            if(i*0.1  > minHeap.arr[0].similarityP) {
+//                minHeap.arr[0] = new SimilarityTuple(i , i*0.1);
+//                minHeap.adjustHeap(0);
+//                System.out.println("adjust");
+//                for(int j = 0; j < minHeap.arr.length; j++) {
+//                    System.out.println(minHeap.arr[j].dataId + " " + minHeap.arr[j].similarityP);
+//                }
+//            }
+//        }
+//
+//        for(int i = 0; i < minHeap.arr.length; i++) {
+//            System.out.println(minHeap.arr[i].dataId + " " + minHeap.arr[i].similarityP);
+//        }
         ExecutionEnvironment env;
         ParameterTool params;
 
@@ -37,15 +64,15 @@ public class Main {
 
         PrepareData prepareData = PrepareData.getInstance(env);
         PrepareResult prepareResult = PrepareResult.getInstance(env);
-
-        Recommender recommender = new Recommender(params, env, prepareData, prepareResult);
-        recommender.solveRecommender();
+//
+//        Recommender recommender = new Recommender(params, env, prepareData, prepareResult);
+//        recommender.solveRecommender();
 //        Knn knn = new Knn(params, env, prepareData, prepareResult);
 //        knn.solveKnn();
 //        knn.test();
 //
-//        CollaborativeFiltering recommender = new CollaborativeFiltering(params, env, prepareData, prepareResult);
-//        recommender.solveCollaborativeFiltering();
+        CollaborativeFiltering collaborativeFiltering = new CollaborativeFiltering(params, env, prepareData, prepareResult);
+        collaborativeFiltering.solveCollaborativeFiltering();
 
 
 //        final ParameterTool params = ParameterTool.fromArgs(args);
