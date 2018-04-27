@@ -132,7 +132,7 @@ public class Tools {
     }
 
     public static List<SimilarityTuple> userBasedRecommend(HashMap<Integer, Result> trainResult, Set<Integer> predictVisibleObj,
-                                                           int topK) {
+                                                           int howMany) {
         List<SimilarityTuple> userSimilarity = new ArrayList<SimilarityTuple>();
         for(Map.Entry<Integer, Result> entry : trainResult.entrySet()) {
             int dataId = entry.getKey();
@@ -142,6 +142,10 @@ public class Tools {
             userSimilarity.add(new SimilarityTuple(dataId, sim));
         }
         userSimilarity = Tools.listSort(userSimilarity);
-        return userSimilarity.subList(0, topK);
+        return userSimilarity.subList(0, howMany);
+    }
+
+    public static double calF1(double acc, double recall) {
+        return 2*acc*recall / (acc + recall);
     }
 }

@@ -32,16 +32,17 @@ public class Knn {
     private ExecutionEnvironment env;
     private ParameterTool params;
 
-    public Knn(ParameterTool params, ExecutionEnvironment env) {
+    public Knn(ParameterTool params, ExecutionEnvironment env, PrepareData prepareData,
+               PrepareResult prepareResult) {
         this.params = params;
         this.env = env;
 
-        prepareData = PrepareData.getInstance(env);
+        prepareData = prepareData;
         trainPosition = prepareData.getTrainPosition();
         trainDirection = prepareData.getTrainDirection();
         testDataDS = prepareData.getTestDataDS();
 
-        prepareResult = PrepareResult.getInstance(env);
+        prepareResult = prepareResult;
         trainResult = prepareResult.getTrainResult();
         testResult = prepareResult.getTestResult();
     }

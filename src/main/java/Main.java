@@ -1,9 +1,33 @@
 import org.apache.flink.api.java.ExecutionEnvironment;
 import org.apache.flink.api.java.utils.ParameterTool;
 
+import java.util.ArrayList;
+import java.util.List;
+
+class PQ {
+    double acc;
+    double recall;
+    public PQ(double acc, double recall) {
+        this.acc = acc;
+        this.recall = recall;
+    }
+}
+
 public class Main {
 
     public static void main(String[] args) throws Exception {
+//        List<PQ> list = new ArrayList<PQ>();
+//        list.add(new PQ(0.9381,0.9683));
+//        list.add(new PQ(0.9079525972,0.984799448757129));
+//        list.add(new PQ(0.885084556384266,0.990190570165258));
+//
+//        list.add(new PQ(0.924188739379066,0.975516945297042));
+//        list.add(new PQ(0.895636158948888,0.987652718470316));
+//        list.add(new PQ(0.873493429041373,0.991625639614306));
+//        for(int i = 0; i < list.size(); i++) {
+//            double res = Tools.calF(list.get(i).acc, list.get(i).recall);
+//            System.out.println("res : " + res);
+//        }
         ExecutionEnvironment env;
         ParameterTool params;
 
@@ -11,12 +35,18 @@ public class Main {
         env = ExecutionEnvironment.getExecutionEnvironment();
         env.getConfig().setGlobalJobParameters(params);
 
-//        Knn knn = new Knn(params, env);
+        PrepareData prepareData = PrepareData.getInstance(env);
+        PrepareResult prepareResult = PrepareResult.getInstance(env);
+
+        Recommender recommender = new Recommender(params, env, prepareData, prepareResult);
+        recommender.solveRecommender();
+//        Knn knn = new Knn(params, env, prepareData, prepareResult);
 //        knn.solveKnn();
 //        knn.test();
+//
+//        CollaborativeFiltering recommender = new CollaborativeFiltering(params, env, prepareData, prepareResult);
+//        recommender.solveCollaborativeFiltering();
 
-        Recommender recommender = new Recommender(params, env);
-        recommender.solveRecommender();
 
 //        final ParameterTool params = ParameterTool.fromArgs(args);
 //        // set up the execution environment
