@@ -32,7 +32,7 @@ public class PrepareData {
 //    private String trainFilePath = "E:\\BIMRecommed\\input\\data_train.csv";
 //    private String testFilePath = "E:\\BIMRecommed\\input\\data_test.csv";
     private String trainFilePath = "/home/pyn/Desktop/BIMRecommed/input/data_train.csv";
-    private String testFilePath = "/home/pyn/Desktop/BIMRecommed/input/data_test.csv";
+    private String testFilePath = "/home/pyn/Desktop/BIMRecommed/check/data_test.csv";
     private static PrepareData prepareData = null;
     private PrepareData(ExecutionEnvironment env) {
         this.env  = env;

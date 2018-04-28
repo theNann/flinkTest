@@ -3,6 +3,7 @@ import org.apache.flink.api.java.DataSet;
 import org.apache.flink.api.java.ExecutionEnvironment;
 import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.api.java.utils.ParameterTool;
+import org.apache.flink.core.fs.FileSystem;
 import org.apache.flink.util.Collector;
 import www.pyn.bean.*;
 
@@ -42,8 +43,8 @@ public class CollaborativeFiltering {
     public void solveCollaborativeFiltering() {
         DataSet<Result> ans = testDataDS.flatMap(new recommenderMap());
         DataSet<Tuple3<Integer, Double, Double>> scores = ans.flatMap(new scoreMap());
-        scores.writeAsCsv("/home/pyn/Desktop/BIMRecommed/output/ScoresCollaboratTmp.csv","\n",",")
-                .setParallelism(1);
+        scores.writeAsCsv("/home/pyn/Desktop/BIMRecommed/output/ScoresCollaboratTmp.csv","\n",",",
+                FileSystem.WriteMode.OVERWRITE).setParallelism(1);
         try {
             env.execute("FlinkScores");
         } catch (Exception e) {}
