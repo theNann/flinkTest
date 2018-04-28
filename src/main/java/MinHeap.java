@@ -12,7 +12,11 @@ public class MinHeap {
     }
 
     public void add(SimilarityTuple similarityTuple) {
-        this.arr[count++] = similarityTuple;
+        this.arr[count] = similarityTuple;
+        count += 1;
+    }
+    public int getCount() {
+        return this.count;
     }
 
     public void buildHeap() {

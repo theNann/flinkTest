@@ -42,7 +42,7 @@ public class CollaborativeFiltering {
     public void solveCollaborativeFiltering() {
         DataSet<Result> ans = testDataDS.flatMap(new recommenderMap());
         DataSet<Tuple3<Integer, Double, Double>> scores = ans.flatMap(new scoreMap());
-        scores.writeAsCsv("/home/pyn/Desktop/BIMRecommed/output/ScoresCollaborat.csv","\n",",")
+        scores.writeAsCsv("/home/pyn/Desktop/BIMRecommed/output/ScoresCollaboratTmp.csv","\n",",")
                 .setParallelism(1);
         try {
             env.execute("FlinkScores");

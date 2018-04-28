@@ -73,31 +73,53 @@ public class Tools {
     public static List<SimilarityTuple> getNearestNeighbors(HashMap<Integer, Position> trainPosition, Position position,
                            int minK, int considerDirectiton, int maxK, HashMap<Integer, Direction>trainDirection,
                                                         Direction direction) {
-        List<SimilarityTuple> similarityTuples = new ArrayList<SimilarityTuple>();
-        for(Map.Entry<Integer,Position> entry : trainPosition.entrySet()) {
-            int dataId = entry.getKey();
-            double sim = Tools.euclideanDistanceSim(entry.getValue().getPosition(), position.getPosition());
-            similarityTuples.add(new SimilarityTuple(dataId, sim));
-        }
-        similarityTuples = Tools.listSort(similarityTuples);
         int kk;
         if(considerDirectiton == 1) {
             kk = maxK;
         } else {
             kk = minK;
         }
+//        List<SimilarityTuple> similarityTuples = new ArrayList<SimilarityTuple>();
+        MinHeap minHeap = new MinHeap(kk);
+        for(Map.Entry<Integer,Position> entry : trainPosition.entrySet()) {
+            int dataId = entry.getKey();
+            double sim = Tools.euclideanDistanceSim(entry.getValue().getPosition(), position.getPosition());
+            if(minHeap.getCount() < kk) {
+                minHeap.add(new SimilarityTuple(dataId, sim));
+                if(minHeap.getCount() == kk) {
+                    minHeap.buildHeap();
+                }
+            } else {
+                if(sim > minHeap.arr[0].similarityP) {
+                    minHeap.arr[0] = new SimilarityTuple(dataId, sim);
+                    minHeap.adjustHeap(0);
+                }
+            }
+        }
+        List<SimilarityTuple> res = new ArrayList<SimilarityTuple>();
         if(considerDirectiton == 0) {
-            return similarityTuples.subList(0, kk);
+            for(int i = 0; i < minHeap.arr.length; i++) {
+                res.add(minHeap.arr[i]);
+            }
+            return res;
         } else {
             //若考虑Direction，就对前maxK个数据进行simD和simP二维排序，选出simD前minK大的数据作为最后结果，
             // 同时也要去除那些direction夹角大于fov的数据（这个比较重要，能够提升recall），所以最后的结果个数小于等于minK。
             List<SimilarityTuple> similarityTuplesNew = new ArrayList<SimilarityTuple>();
-            for(int i = 0; i < kk; i++) {
-                int dataId = similarityTuples.get(i).dataId;
-                double simP = similarityTuples.get(i).similarityP;
+            int maxSimPIndex = 0;
+            double maxSimp = minHeap.arr[0].similarityP;
+
+            for(int i = 0; i < minHeap.arr.length; i++) {
+                int dataId = minHeap.arr[i].dataId;
+                double simP = minHeap.arr[i].similarityP;
                 double simD = Tools.vectorSimlarity(trainDirection.get(dataId).getDirection(), direction.getDirection());
                 similarityTuplesNew.add(new SimilarityTuple(dataId, simP, simD));
+                if(maxSimp < simP) {
+                    maxSimp = simP;
+                    maxSimPIndex = i;
+                }
             }
+
             Collections.sort(similarityTuplesNew, new Comparator<SimilarityTuple>() {
                 public int compare(SimilarityTuple o1, SimilarityTuple o2) {
                     if(o2.similarityD > o1.similarityD) {
@@ -113,8 +135,8 @@ public class Tools {
                     }
                 }
             });
-            List<SimilarityTuple> res = new ArrayList<SimilarityTuple>();
-            for(int i = 0; i < kk; i++) {
+
+            for(int i = 0; i < similarityTuplesNew.size(); i++) {
                 if(similarityTuplesNew.get(i).similarityD < Math.cos(1.0472)) {
                     break;
                 } else {
@@ -125,7 +147,7 @@ public class Tools {
                 }
             }
             if(res.size() == 0) {
-                res.add(similarityTuples.get(0));
+                res.add(minHeap.arr[maxSimPIndex]);
             }
             return res;
         }
