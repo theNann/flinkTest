@@ -20,8 +20,7 @@ public class Tools {
         double dotRes = vec1.dotProduct(vec2);
         double denorm = vec1.getNorm() * vec2.getNorm();
         double cos = dotRes / denorm;
-//        return 0.5 + 0.5 * cos;
-        return cos;
+        return 0.5 + 0.5 * cos;
     }
 
     public static double euclideanDistanceSim(double[] v1, double[] v2) {
@@ -79,7 +78,6 @@ public class Tools {
         } else {
             kk = minK;
         }
-//        List<SimilarityTuple> similarityTuples = new ArrayList<SimilarityTuple>();
         MinHeap minHeap = new MinHeap(kk);
         for(Map.Entry<Integer,Position> entry : trainPosition.entrySet()) {
             int dataId = entry.getKey();
@@ -95,27 +93,6 @@ public class Tools {
                     minHeap.adjustHeap(0);
                 }
             }
-        }
-        /*
-        前15大： 3082 0.3239528344648195
-前15大： 5693 0.44326841161747826
-前15大： 577 0.3484965087575313
-前15大： 7719 0.48682421019260047
-前15大： 1764 0.6172192773740202
-前15大： 5014 0.37494338882550643
-前15大： 3284 0.37155020800284505
-前15大： 9153 0.7008986415954628
-前15大： 5324 0.48843160567314436
-前15大： 7308 0.8313174461293918
-前15大： 1486 0.7063195267556713
-前15大： 9338 0.5479543171566342
-前15大： 4560 0.40521440070228054
-前15大： 9088 0.8211664535859425
-前15大： 1927 0.4060304625815459
-
-         */
-        for(int i = 0; i < minHeap.arr.length; i++) {
-            System.out.println("前15大： " + minHeap.arr[i].dataId + " " + minHeap.arr[i].similarityP);
         }
 
         List<SimilarityTuple> res = new ArrayList<SimilarityTuple>();
@@ -147,10 +124,10 @@ public class Tools {
                     if(o2.similarityD > o1.similarityD) {
                         return 1;
                     } else if(o2.similarityD == o1.similarityD) {
-                        if(o1.similarityP > o2.similarityP) {
+                        if(o2.similarityP > o1.similarityP) {
                             return 1;
                         } else {
-                            return 0;
+                            return -1;
                         }
                     } else {
                         return -1;
@@ -158,6 +135,7 @@ public class Tools {
                 }
             });
 
+            res.clear();
             for(int i = 0; i < similarityTuplesNew.size(); i++) {
                 if(similarityTuplesNew.get(i).similarityD < Math.cos(1.0472)) {
                     break;
@@ -182,6 +160,7 @@ public class Tools {
         for(Map.Entry<Integer, Result> entry : trainResult.entrySet()) {
             int dataId = entry.getKey();
             Set<Integer> visibleObj = entry.getValue().getVisibleObj();
+            // 耗时的重点所在：计算两个较大集合的相似度
             double sim = Tools.setSimilarity(predictVisibleObj, visibleObj);
             //当只有一个sim时调用第一个构造函数，虽然是similarityP，这里也可认为是结果集合的相似性
             if(count < howMany) {
