@@ -1,6 +1,4 @@
-
 import org.apache.commons.math3.linear.ArrayRealVector;
-import org.omg.CORBA.INTERNAL;
 import www.pyn.bean.Direction;
 import www.pyn.bean.Position;
 import www.pyn.bean.Result;
@@ -33,26 +31,55 @@ public class Tools {
     }
 
     public static int intersection(Set<Integer> set1, Set<Integer> set2) {
-        Set<Integer> jiao = new HashSet<Integer>();
-        jiao.clear();
-        jiao.addAll(set1);
-        jiao.retainAll(set2);
-        return jiao.size();
+        Map<Integer, Integer> map = new HashMap<Integer, Integer>();
+        Iterator iterator = set1.iterator();
+        while(iterator.hasNext()) {
+            map.put((Integer) iterator.next(), 1);
+        }
+
+        iterator = set2.iterator();
+        int jiaoSize = 0;
+        while(iterator.hasNext()) {
+            if(map.containsKey((Integer) iterator.next())) {
+                jiaoSize += 1;
+            }
+        }
+        return jiaoSize;
     }
 
     public static double setSimilarity(Set<Integer> set1, Set<Integer> set2) {
         if(set1.size() == 0 && set2.size() == 0) {
             return 0;
         }
-        Set<Integer> jiao = new HashSet<Integer>();
-        jiao.clear();
-        jiao.addAll(set1);
-        jiao.retainAll(set2);
-        Set<Integer> bing = new HashSet<Integer>();
-        bing.clear();
-        bing.addAll(set1);
-        bing.addAll(set2);
-        return jiao.size()*1.0 / bing.size();
+        int jiaoSize = 0;
+        int bingSize = 0;
+        Map<Integer, Integer> map = new HashMap<Integer, Integer>();
+        Iterator iterator = set1.iterator();
+        while(iterator.hasNext()) {
+            int tmp = (Integer) iterator.next();
+            map.put(tmp, 1);
+            bingSize += 1;
+        }
+        iterator = set2.iterator();
+        while(iterator.hasNext()) {
+            int tmp = (Integer) iterator.next();
+            if(map.containsKey(tmp)) {
+                jiaoSize += 1;
+            } else {
+                bingSize += 1;
+            }
+        }
+        return jiaoSize*1.0 / bingSize;
+
+//        Set<Integer> jiao = new HashSet<Integer>();
+//        jiao.clear();
+//        jiao.addAll(set1);
+//        jiao.retainAll(set2);
+//        Set<Integer> bing = new HashSet<Integer>();
+//        bing.clear();
+//        bing.addAll(set1);
+//        bing.addAll(set2);
+//        return jiao.size()*1.0 / bing.size();
     }
 
     public static List<SimilarityTuple> listSort(List<SimilarityTuple> list) {
@@ -156,25 +183,25 @@ public class Tools {
     public static List<SimilarityTuple> userBasedRecommend(HashMap<Integer, Result> trainResult, Set<Integer> predictVisibleObj,
                                                            int howMany) {
         MinHeap minHeap = new MinHeap(howMany);
-        int count = 0;
         for(Map.Entry<Integer, Result> entry : trainResult.entrySet()) {
             int dataId = entry.getKey();
             Set<Integer> visibleObj = entry.getValue().getVisibleObj();
             // 耗时的重点所在：计算两个较大集合的相似度
             double sim = Tools.setSimilarity(predictVisibleObj, visibleObj);
             //当只有一个sim时调用第一个构造函数，虽然是similarityP，这里也可认为是结果集合的相似性
-            if(count < howMany) {
+            if(minHeap.getCount() < howMany) {
                 minHeap.add(new SimilarityTuple(dataId, sim));
-            } else if(count == howMany) {
-                minHeap.buildHeap();
+                if(minHeap.getCount() == howMany) {
+                    minHeap.buildHeap();
+                }
             } else {
                 if(sim > minHeap.arr[0].similarityP) {
                     minHeap.arr[0] = new SimilarityTuple(dataId, sim);
                     minHeap.adjustHeap(0);
                 }
             }
-            count += 1;
         }
+
         List<SimilarityTuple> userSimilarity = new ArrayList<SimilarityTuple>();
         for(int i = 0; i < minHeap.arr.length; i++) {
             userSimilarity.add(minHeap.arr[i]);

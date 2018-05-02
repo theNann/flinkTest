@@ -22,7 +22,8 @@ import java.util.List;
 //TODO 调试为什么knn-8中选取5个邻居的acc和recall与python版本结果不同，猜测是因为position应该改成欧几里得距离而不是cosine（已完成）
 //TODO 添加推荐算法(已完成)
 //TODO 增加更多的训练和测试数据
-//TODO 加快效率，要能做到每秒30帧（每个测试数据30ms得出结果）：1）KNN和推荐时可用小顶堆维护求TopK问题 2）思考有没有方法能够避免遍历所有训练集
+//TODO 加快效率，要能做到每秒30帧（每个测试数据30ms得出结果）:
+//TODO 1）KNN和推荐时可用小顶堆维护求TopK问题(没啥卵用，当前训练集数目不多，排序也挺快) 2）思考有没有方法能够避免遍历所有训练集 3）集合运算能不能优化
 @SuppressWarnings("serial")
 public class PrepareData {
     private ExecutionEnvironment env;

@@ -97,7 +97,7 @@ public class Knn {
 //        }
 
         DataSet<Tuple3<Integer, Double, Double>> scores = ans.flatMap(new scoreMap());
-        scores.writeAsCsv("/home/pyn/Desktop/BIMRecommed/output/flinkScores.csv","\n",",")
+        scores.writeAsCsv("/home/pyn/Desktop/BIMRecommed/output/flinkScoresTmp.csv","\n",",")
                 .setParallelism(1);
         try {
             env.execute("FlinkScores");
@@ -107,6 +107,7 @@ public class Knn {
     public static final class scoreMap implements FlatMapFunction<Result, Tuple3<Integer,Double, Double>> {
         public void flatMap(Result result, Collector<Tuple3<Integer, Double, Double>> collector) throws Exception {
             int dataId = result.getDataId();
+            System.out.println("testDataId : " + dataId);
             Set<Integer> preditcVisibleObj = result.getVisibleObj();
             Set<Integer> targetVisibleObj = testResult.get(dataId).getVisibleObj();
             int jiaoSize = Tools.intersection(preditcVisibleObj, targetVisibleObj);

@@ -79,6 +79,8 @@ public class CollaborativeFiltering {
                 visibleObjSet.addAll(rs.getVisibleObj());
             }
             int howMany = 3;
+//            List<SimilarityTuple> recommendNearestNeighbors = Tools.getNearestNeighbors(trainPosition, position, 3,
+//                    1, 15, trainDirection, direction);
             List<SimilarityTuple> recommendNearestNeighbors = Tools.userBasedRecommend(trainResult, visibleObjSet, howMany);
             for(int i = 0; i < recommendNearestNeighbors.size(); i++) {
                 int simId = recommendNearestNeighbors.get(i).dataId;
