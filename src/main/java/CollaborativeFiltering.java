@@ -7,10 +7,7 @@ import org.apache.flink.core.fs.FileSystem;
 import org.apache.flink.util.Collector;
 import www.pyn.bean.*;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class CollaborativeFiltering {
     private static HashMap<Integer, Position> trainPosition;
@@ -52,10 +49,10 @@ public class CollaborativeFiltering {
 
     public static final class scoreMap implements FlatMapFunction<Result, Tuple3<Integer,Double, Double>> {
         public void flatMap(Result result, Collector<Tuple3<Integer, Double, Double>> collector) throws Exception {
-            Set<Integer> preditcVisibleObj = result.getVisibleObj();
             int dataId = result.getDataId();
+            List<Integer> preditcVisibleObj = result.getVisibleObj();
             System.out.println("testDataId : " + dataId);
-            Set<Integer> targetVisibleObj = testResult.get(dataId).getVisibleObj();
+            List<Integer> targetVisibleObj = testResult.get(dataId).getVisibleObj();
             int jiaoSize = Tools.intersection(preditcVisibleObj, targetVisibleObj);
             double acc = jiaoSize*1.0 / preditcVisibleObj.size();
             double recall = jiaoSize*1.0 / targetVisibleObj.size();
@@ -78,10 +75,12 @@ public class CollaborativeFiltering {
                 Result rs = trainResult.get(simId);
                 visibleObjSet.addAll(rs.getVisibleObj());
             }
+            List<Integer> visibleObjList = new ArrayList<Integer>(visibleObjSet);
+            Collections.sort(visibleObjList);
             int howMany = 3;
 //            List<SimilarityTuple> recommendNearestNeighbors = Tools.getNearestNeighbors(trainPosition, position, 3,
 //                    1, 15, trainDirection, direction);
-            List<SimilarityTuple> recommendNearestNeighbors = Tools.userBasedRecommend(trainResult, visibleObjSet, howMany);
+            List<SimilarityTuple> recommendNearestNeighbors = Tools.userBasedRecommend(trainResult, visibleObjList, howMany);
             for(int i = 0; i < recommendNearestNeighbors.size(); i++) {
                 int simId = recommendNearestNeighbors.get(i).dataId;
                 if(simId == coldStartDataId) {
@@ -90,7 +89,7 @@ public class CollaborativeFiltering {
                 Result rs = trainResult.get(simId);
                 visibleObjSet.addAll(rs.getVisibleObj());
             }
-            collector.collect(new Result(dataId, visibleObjSet));
+            collector.collect(new Result(dataId, new ArrayList<Integer>(visibleObjSet)));
         }
     }
 }

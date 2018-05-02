@@ -106,10 +106,10 @@ public class Knn {
 
     public static final class scoreMap implements FlatMapFunction<Result, Tuple3<Integer,Double, Double>> {
         public void flatMap(Result result, Collector<Tuple3<Integer, Double, Double>> collector) throws Exception {
+            List<Integer> preditcVisibleObj = result.getVisibleObj();
             int dataId = result.getDataId();
             System.out.println("testDataId : " + dataId);
-            Set<Integer> preditcVisibleObj = result.getVisibleObj();
-            Set<Integer> targetVisibleObj = testResult.get(dataId).getVisibleObj();
+            List<Integer> targetVisibleObj = testResult.get(dataId).getVisibleObj();
             int jiaoSize = Tools.intersection(preditcVisibleObj, targetVisibleObj);
             double acc = jiaoSize*1.0 / preditcVisibleObj.size();
             double recall = jiaoSize*1.0 / targetVisibleObj.size();
@@ -135,7 +135,7 @@ public class Knn {
                 Result rs = trainResult.get(simId);
                 visibleObjSet.addAll(rs.getVisibleObj());
             }
-            collector.collect(new Result(dataId,visibleObjSet));
+            collector.collect(new Result(dataId,new ArrayList<Integer>(visibleObjSet)));
         }
     }
 

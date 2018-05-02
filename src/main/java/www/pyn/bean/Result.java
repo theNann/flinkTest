@@ -8,8 +8,8 @@ import java.util.Set;
  */
 public class Result {
     private int dataId;
-    private Set<Integer> visibleObj;
-    public Result(int dataId, Set<Integer> visibleObj) {
+    private List<Integer> visibleObj;
+    public Result(int dataId, List<Integer> visibleObj) {
         this.dataId = dataId;
         this.visibleObj = visibleObj;
     }
@@ -18,7 +18,7 @@ public class Result {
         return dataId;
     }
 
-    public Set<Integer> getVisibleObj() {
+    public List<Integer> getVisibleObj() {
         return visibleObj;
     }
 
@@ -26,7 +26,7 @@ public class Result {
         this.dataId = dataId;
     }
 
-    public void setVisibleObj(Set<Integer> visibleObj) {
+    public void setVisibleObj(List<Integer> visibleObj) {
         this.visibleObj = visibleObj;
     }
 

@@ -6,10 +6,7 @@ import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.util.Collector;
 import www.pyn.bean.*;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class Recommender {
     private static HashMap<Integer, Position> trainPosition;
@@ -65,24 +62,24 @@ public class Recommender {
             //CollaborativeFiltering
             for(int i = 0; i < kNearestNeighbors.size(); i++) {
                 int simId = kNearestNeighbors.get(i).dataId;
-                Set<Integer> visibleObj = trainResult.get(simId).getVisibleObj();
+                List<Integer> visibleObj = trainResult.get(simId).getVisibleObj();
                 List<SimilarityTuple> recommendNearestNeighbors = Tools.userBasedRecommend(trainResult, visibleObj, howMany);
                 for(int j = 0; j < recommendNearestNeighbors.size(); j++) {
                     int _simId = recommendNearestNeighbors.get(j).dataId;
-                    Set<Integer> _visibleObj = trainResult.get(_simId).getVisibleObj();
+                    List<Integer> _visibleObj = trainResult.get(_simId).getVisibleObj();
                     visibleObjSet.addAll(_visibleObj);
                 }
             }
-            collector.collect(new Result(dataId, visibleObjSet));
+            collector.collect(new Result(dataId, new ArrayList<Integer>(visibleObjSet)));
         }
     }
 
     public static final class scoreMap implements FlatMapFunction<Result, Tuple3<Integer, Double, Double>> {
         public void flatMap(Result result, Collector<Tuple3<Integer, Double, Double>> collector) throws Exception {
-            Set<Integer> preditcVisibleObj = result.getVisibleObj();
+            List<Integer> preditcVisibleObj = result.getVisibleObj();
             int dataId = result.getDataId();
-            System.out.println("dataId: " + dataId);
-            Set<Integer> targetVisibleObj = testResult.get(dataId).getVisibleObj();
+            System.out.println("testDataId : " + dataId);
+            List<Integer> targetVisibleObj = testResult.get(dataId).getVisibleObj();
             int jiaoSize = Tools.intersection(preditcVisibleObj, targetVisibleObj);
             double acc = jiaoSize*1.0 / preditcVisibleObj.size();
             double recall = jiaoSize*1.0 / targetVisibleObj.size();

@@ -30,56 +30,69 @@ public class Tools {
         return sim;
     }
 
-    public static int intersection(Set<Integer> set1, Set<Integer> set2) {
+    public static int intersection(List <Integer> list1, List<Integer> list2) {
         Map<Integer, Integer> map = new HashMap<Integer, Integer>();
-        Iterator iterator = set1.iterator();
-        while(iterator.hasNext()) {
-            map.put((Integer) iterator.next(), 1);
+
+        for(int i = 0; i < list1.size(); i++) {
+            map.put(list1.get(i), 1);
         }
 
-        iterator = set2.iterator();
         int jiaoSize = 0;
-        while(iterator.hasNext()) {
-            if(map.containsKey((Integer) iterator.next())) {
+        for(int i = 0; i < list2.size(); i++) {
+            if(map.containsKey(list2.get(i))) {
                 jiaoSize += 1;
             }
         }
         return jiaoSize;
     }
 
-    public static double setSimilarity(Set<Integer> set1, Set<Integer> set2) {
+    public static double setSimilarity(List<Integer> set1, List<Integer> set2) {
         if(set1.size() == 0 && set2.size() == 0) {
             return 0;
         }
         int jiaoSize = 0;
         int bingSize = 0;
-        Map<Integer, Integer> map = new HashMap<Integer, Integer>();
-        Iterator iterator = set1.iterator();
-        while(iterator.hasNext()) {
-            int tmp = (Integer) iterator.next();
-            map.put(tmp, 1);
+        int i = 0;
+        int j = 0;
+        while(i < set1.size() && j < set2.size()) {
             bingSize += 1;
-        }
-        iterator = set2.iterator();
-        while(iterator.hasNext()) {
-            int tmp = (Integer) iterator.next();
-            if(map.containsKey(tmp)) {
+            if(set1.get(i).equals(set2.get(j))) {
                 jiaoSize += 1;
+                i += 1;
+                j += 1;
             } else {
-                bingSize += 1;
+                if(set1.get(i) < set2.get(j)) {
+                    i += 1;
+                } else {
+                    j += 1;
+                }
             }
         }
+        if(i < set1.size()) {
+            bingSize += set1.size() - i;
+        }
+        if(j < set2.size()) {
+            bingSize += set2.size() - j;
+        }
+//        System.out.println("jiao : " + jiaoSize + " bing: " + bingSize + " res: " + jiaoSize*1.0 / bingSize);
         return jiaoSize*1.0 / bingSize;
-
-//        Set<Integer> jiao = new HashSet<Integer>();
-//        jiao.clear();
-//        jiao.addAll(set1);
-//        jiao.retainAll(set2);
-//        Set<Integer> bing = new HashSet<Integer>();
-//        bing.clear();
-//        bing.addAll(set1);
-//        bing.addAll(set2);
-//        return jiao.size()*1.0 / bing.size();
+//        Map<Integer, Integer> map = new HashMap<Integer, Integer>();
+//        Iterator iterator = set1.iterator();
+//        while(iterator.hasNext()) {
+//            int tmp = (Integer) iterator.next();
+//            map.put(tmp, 1);
+//            bingSize += 1;
+//        }
+//        iterator = set2.iterator();
+//        while(iterator.hasNext()) {
+//            int tmp = (Integer) iterator.next();
+//            if(map.containsKey(tmp)) {
+//                jiaoSize += 1;
+//            } else {
+//                bingSize += 1;
+//            }
+//        }
+//        return jiaoSize*1.0 / bingSize;
     }
 
     public static List<SimilarityTuple> listSort(List<SimilarityTuple> list) {
@@ -180,12 +193,12 @@ public class Tools {
         }
     }
 
-    public static List<SimilarityTuple> userBasedRecommend(HashMap<Integer, Result> trainResult, Set<Integer> predictVisibleObj,
+    public static List<SimilarityTuple> userBasedRecommend(HashMap<Integer, Result> trainResult, List<Integer> predictVisibleObj,
                                                            int howMany) {
         MinHeap minHeap = new MinHeap(howMany);
         for(Map.Entry<Integer, Result> entry : trainResult.entrySet()) {
             int dataId = entry.getKey();
-            Set<Integer> visibleObj = entry.getValue().getVisibleObj();
+            List<Integer> visibleObj = entry.getValue().getVisibleObj();
             // 耗时的重点所在：计算两个较大集合的相似度
             double sim = Tools.setSimilarity(predictVisibleObj, visibleObj);
             //当只有一个sim时调用第一个构造函数，虽然是similarityP，这里也可认为是结果集合的相似性

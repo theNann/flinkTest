@@ -48,11 +48,12 @@ public class PrepareResult {
             public void flatMap(String s, Collector<Result> collector) throws Exception {
                 String[] split = s.split(", ");
                 int dataId = Integer.valueOf(split[0]);
-                Set<Integer> visibleObj = new HashSet<Integer>();
+                List<Integer> visibleObj = new ArrayList<Integer>();
                 for(int i = 1; i < split.length; i++) {
                     visibleObj.add(Integer.valueOf(split[i]));
                 }
-                Result result = new Result(dataId, new HashSet<Integer>(visibleObj));
+                Collections.sort(visibleObj);
+                Result result = new Result(dataId, visibleObj);
                 collector.collect(result);
             }
         });
@@ -68,6 +69,7 @@ public class PrepareResult {
         }
         return null;
     }
+
     public HashMap<Integer,Result> getTrainResult() {
         return trainResult;
     }
