@@ -106,8 +106,8 @@ public class Knn {
 
     public static final class scoreMap implements FlatMapFunction<Result, Tuple3<Integer,Double, Double>> {
         public void flatMap(Result result, Collector<Tuple3<Integer, Double, Double>> collector) throws Exception {
-            List<Integer> preditcVisibleObj = result.getVisibleObj();
             int dataId = result.getDataId();
+            List<Integer> preditcVisibleObj = result.getVisibleObj();
             System.out.println("testDataId : " + dataId);
             List<Integer> targetVisibleObj = testResult.get(dataId).getVisibleObj();
             int jiaoSize = Tools.intersection(preditcVisibleObj, targetVisibleObj);

@@ -39,7 +39,7 @@ public class Recommender {
     public void solveRecommender() {
         DataSet<Result> ans = testDataDS.flatMap(new recommenderMap());
         DataSet<Tuple3<Integer, Double, Double>> scores = ans.flatMap(new scoreMap());
-        scores.writeAsCsv("/home/pyn/Desktop/BIMRecommed/output/flinkScores.csv","\n",",")
+        scores.writeAsCsv("/home/pyn/Desktop/BIMRecommed/output/ScoresCollaboratTmp.csv","\n",",")
                 .setParallelism(1);
         try {
             env.execute("FlinkScores");
