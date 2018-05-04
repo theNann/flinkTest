@@ -1,8 +1,15 @@
 import org.apache.commons.math3.analysis.function.Min;
+import org.apache.flink.api.common.functions.MapFunction;
+import org.apache.flink.api.java.DataSet;
 import org.apache.flink.api.java.ExecutionEnvironment;
 import org.apache.flink.api.java.utils.ParameterTool;
+import org.apache.flink.streaming.api.datastream.DataStream;
+import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import www.pyn.bean.SimilarityTuple;
 
+import java.io.DataInputStream;
+import java.io.InputStream;
+import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,19 +25,40 @@ class PQ {
 public class Main {
 
     public static void main(String[] args) throws Exception {
+        String ip = "localhost";
+        int port = 6001;
 
-        ExecutionEnvironment env;
-        ParameterTool params;
+//        Socket socket = new Socket(ip, port);
+//        System.out.println("连上服务器");
+//        InputStream input = socket.getInputStream();
+//        byte[] res = new byte[10];
+//        int len = input.read(res);
+//        System.out.println("len , ret : " + len + " " + new String(res));
+//        input.close();
+//        socket.close();
 
-        params = ParameterTool.fromArgs(args);
-        env = ExecutionEnvironment.getExecutionEnvironment();
-        env.getConfig().setGlobalJobParameters(params);
+        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+        DataStream<String> text = env.socketTextStream(ip, port, "\n");
+        text.map(new MapFunction<String, Object>() {
+            public Object map(String s) throws Exception {
+                System.out.println("rec : " + s);
+                return 10;
+            }
+        });
+        env.execute("test");
 
-        PrepareData prepareData = PrepareData.getInstance(env);
-        PrepareResult prepareResult = PrepareResult.getInstance(env);
+//        ExecutionEnvironment env;
+//        ParameterTool params;
+//
+//        params = ParameterTool.fromArgs(args);
+//        env = ExecutionEnvironment.getExecutionEnvironment();
+//        env.getConfig().setGlobalJobParameters(params);
 
-        CollaborativeFiltering collaborativeFiltering = new CollaborativeFiltering(params, env, prepareData, prepareResult);
-        collaborativeFiltering.solveCollaborativeFiltering();
+//        PrepareData prepareData = PrepareData.getInstance(env);
+//        PrepareResult prepareResult = PrepareResult.getInstance(env);
+
+//        CollaborativeFiltering collaborativeFiltering = new CollaborativeFiltering(params, env, prepareData, prepareResult);
+//        collaborativeFiltering.solveCollaborativeFiltering();
 
 //        Recommender recommender = new Recommender(params, env, prepareData, prepareResult);
 //        recommender.solveRecommender();
