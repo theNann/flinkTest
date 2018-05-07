@@ -25,7 +25,7 @@ class PQ {
 public class Main {
 
     public static void main(String[] args) throws Exception {
-        String ip = "localhost";
+        String ip = "10.222.163.208" ;
         int port = 6001;
 
 //        Socket socket = new Socket(ip, port);
@@ -37,25 +37,39 @@ public class Main {
 //        input.close();
 //        socket.close();
 
-        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-        DataStream<String> text = env.socketTextStream(ip, port, "\n");
+        ExecutionEnvironment env;
+        ParameterTool params;
+
+        params = ParameterTool.fromArgs(args);
+        env = ExecutionEnvironment.getExecutionEnvironment();
+        env.getConfig().setGlobalJobParameters(params);
+
+        PrepareData prepareData = PrepareData.getInstance(env);
+        PrepareResult prepareResult = PrepareResult.getInstance(env);
+//        System.out.println("train_size " + prepareData.getTrainPosition().size());
+//        System.out.println("result_size " + prepareResult.getTrainResult().size());
+
+        StreamExecutionEnvironment senv = StreamExecutionEnvironment.getExecutionEnvironment();
+        DataStream<String> text = senv.socketTextStream(ip, port, "\n");
         text.map(new MapFunction<String, Object>() {
             public Object map(String s) throws Exception {
-                System.out.println("rec : " + s);
+
+                char[] chs = s.toCharArray();
+//                for(int i = 0; i < chs.length; i++) {
+//                    System.out.println((int)chs[i]);
+//                }
+                int i = 0;
+                while(i < 68) {
+                    int num = (chs[i+3] << 24) | (chs[i+2] << 16) | (chs[i+1] << 8) | (chs[i]);
+                    double num1 = num*1.0/1000000;
+                    i += 4;
+                    System.out.println("num1 : " + num1);
+                }
                 return 10;
             }
         });
-        env.execute("test");
+        senv.execute("test");
 
-//        ExecutionEnvironment env;
-//        ParameterTool params;
-//
-//        params = ParameterTool.fromArgs(args);
-//        env = ExecutionEnvironment.getExecutionEnvironment();
-//        env.getConfig().setGlobalJobParameters(params);
-
-//        PrepareData prepareData = PrepareData.getInstance(env);
-//        PrepareResult prepareResult = PrepareResult.getInstance(env);
 
 //        CollaborativeFiltering collaborativeFiltering = new CollaborativeFiltering(params, env, prepareData, prepareResult);
 //        collaborativeFiltering.solveCollaborativeFiltering();
