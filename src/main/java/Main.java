@@ -37,30 +37,30 @@ public class Main {
 //        input.close();
 //        socket.close();
 
-        ExecutionEnvironment env;
-        ParameterTool params;
-
-        params = ParameterTool.fromArgs(args);
-        env = ExecutionEnvironment.getExecutionEnvironment();
-        env.getConfig().setGlobalJobParameters(params);
-
-        PrepareData prepareData = PrepareData.getInstance(env);
-        PrepareResult prepareResult = PrepareResult.getInstance(env);
+//        ExecutionEnvironment env;
+//        ParameterTool params;
+//
+//        params = ParameterTool.fromArgs(args);
+//        env = ExecutionEnvironment.getExecutionEnvironment();
+//        env.getConfig().setGlobalJobParameters(params);
+//
+//        PrepareData prepareData = PrepareData.getInstance(env);
+//        PrepareResult prepareResult = PrepareResult.getInstance(env);
 //        System.out.println("train_size " + prepareData.getTrainPosition().size());
 //        System.out.println("result_size " + prepareResult.getTrainResult().size());
 
         StreamExecutionEnvironment senv = StreamExecutionEnvironment.getExecutionEnvironment();
-        DataStream<String> text = senv.socketTextStream(ip, port, "\n");
-        text.map(new MapFunction<String, Object>() {
-            public Object map(String s) throws Exception {
 
-                char[] chs = s.toCharArray();
-//                for(int i = 0; i < chs.length; i++) {
-//                    System.out.println((int)chs[i]);
+        DataStream<byte[]> bytes = senv.addSource(new SocketByteStreamFunction(ip, port,0L));
+        bytes.map(new MapFunction<byte[], Object>() {
+            public Object map(byte[] bytes) throws Exception {
+                System.out.println("size : " + bytes.length);
+//                for(int i = 0; i < bytes.length; i++) {
+//                    System.out.println(bytes[i]&0xff);
 //                }
                 int i = 0;
-                while(i < 68) {
-                    int num = (chs[i+3] << 24) | (chs[i+2] << 16) | (chs[i+1] << 8) | (chs[i]);
+                while(i < bytes.length) {
+                    int num = ((bytes[i+3]&0xff) << 24) | ((bytes[i+2]&0xff) << 16) | ((bytes[i+1]&0xff) << 8) | (bytes[i]&0xff);
                     double num1 = num*1.0/1000000;
                     i += 4;
                     System.out.println("num1 : " + num1);
@@ -68,6 +68,26 @@ public class Main {
                 return 10;
             }
         });
+
+//        DataStream<String> text = senv.socketTextStream(ip, port, "\n");
+//        text.map(new MapFunction<String, Object>() {
+//            public Object map(String s) throws Exception {
+//
+//                byte[] buffer = s.getBytes();
+//                System.out.println("size : " + buffer.length);
+////                for(int i = 0; i < chs.length; i++) {
+////                    System.out.println((int)chs[i]);
+////                }
+//                int i = 0;
+//                while(i < 68) {
+//                    int num = ((buffer[i+3]&0xff) << 24) | ((buffer[i+2]&0xff) << 16) | ((buffer[i+1]&0xff) << 8) | (buffer[i]&0xff);
+//                    double num1 = num*1.0/1000000;
+//                    i += 4;
+//                    System.out.println("num1 : " + num1);
+//                }
+//                return 10;
+//            }
+//        });
         senv.execute("test");
 
 
