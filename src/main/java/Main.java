@@ -52,6 +52,7 @@ public class Main {
         StreamExecutionEnvironment senv = StreamExecutionEnvironment.getExecutionEnvironment();
 
         DataStream<byte[]> bytes = senv.addSource(new SocketByteStreamFunction(ip, port,0L));
+
         bytes.map(new MapFunction<byte[], Object>() {
             public Object map(byte[] bytes) throws Exception {
                 System.out.println("size : " + bytes.length);
@@ -63,13 +64,13 @@ public class Main {
                     int num = ((bytes[i+3]&0xff) << 24) | ((bytes[i+2]&0xff) << 16) | ((bytes[i+1]&0xff) << 8) | (bytes[i]&0xff);
                     double num1 = num*1.0/1000000;
                     i += 4;
-                    System.out.println("num1 : " + num1);
+//                    System.out.println("num1 : " + num1);
                 }
                 return 10;
             }
         });
 
-//        DataStream<String> text = senv.socketTextStream(ip, port, "\n");
+        DataStream<String> text = senv.socketTextStream(ip, port, "\n");
 //        text.map(new MapFunction<String, Object>() {
 //            public Object map(String s) throws Exception {
 //

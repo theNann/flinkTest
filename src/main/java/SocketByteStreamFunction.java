@@ -48,12 +48,15 @@ public class SocketByteStreamFunction implements SourceFunction<byte[]>{
                 LOG.info("Connecting to server socket " + this.hostname + ':' + this.port);
                 socket.connect(new InetSocketAddress(this.hostname, this.port), 0);
                 InputStream input = socket.getInputStream();
-                byte[] in = new byte[byteNum];
-                int curlen = 0;
-                while(this.isRunning && curlen < byteNum) {
-                    curlen += input.read(in, curlen, byteNum-curlen);
+                byte[] in = new byte[68];//因为每个数据是68byte,8160/68=120,也就是每次读120个数据
+                int bytesRead;
+                while(this.isRunning && (bytesRead = input.read(in, 0, byteNum)) != -1) {
+                    while(bytesRead < byteNum) {
+                        bytesRead += input.read(in, bytesRead, byteNum-bytesRead);
+                    }
+                    ctx.collect(in);
                 }
-                ctx.collect(in);
+//                ctx.collect(in);
             } catch (Throwable var19) {
                 var6 = var19;
             } finally {
