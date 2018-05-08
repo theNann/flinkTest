@@ -27,10 +27,10 @@ public class SocketByteStreamFunction implements SourceFunction<byte[]>{
     private final long maxNumRetries;
     private final long delayBetweenRetries;
     private int byteNum;
-    public SocketByteStreamFunction(String hostname, int port, long maxNumRetries) {
+    public SocketByteStreamFunction(String hostname, int port, int byteNum, long maxNumRetries) {
         this.hostname = (String) Preconditions.checkNotNull(hostname, "hostname must not be null");
         this.port = port;
-        byteNum = 68;
+        this.byteNum = byteNum;
         this.isRunning = true;
         this.maxNumRetries = maxNumRetries;
         this.delayBetweenRetries = 500L;
@@ -48,7 +48,7 @@ public class SocketByteStreamFunction implements SourceFunction<byte[]>{
                 LOG.info("Connecting to server socket " + this.hostname + ':' + this.port);
                 socket.connect(new InetSocketAddress(this.hostname, this.port), 0);
                 InputStream input = socket.getInputStream();
-                byte[] in = new byte[68];//因为每个数据是68byte,8160/68=120,也就是每次读120个数据
+                byte[] in = new byte[byteNum];//因为每个数据是68byte,8160/68=120,也就是每次读120个数据
                 int bytesRead;
                 while(this.isRunning && (bytesRead = input.read(in, 0, byteNum)) != -1) {
                     while(bytesRead < byteNum) {

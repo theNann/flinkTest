@@ -85,4 +85,17 @@ public class PrimitiveData implements Serializable {
     public void setDz(double dz) {
         this.dz = dz;
     }
+
+    @Override
+    public String toString() {
+        return "PrimitiveData{" +
+                "dataId=" + dataId +
+                ", px=" + px +
+                ", py=" + py +
+                ", pz=" + pz +
+                ", dx=" + dx +
+                ", dy=" + dy +
+                ", dz=" + dz +
+                '}';
+    }
 }

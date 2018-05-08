@@ -163,5 +163,7 @@ public class Knn {
         this.testDataDS = testDataDS;
     }
 
-
+    public static HashMap<Integer, Result> getTrainResult() {
+        return trainResult;
+    }
 }

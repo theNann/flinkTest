@@ -1,17 +1,24 @@
 import org.apache.commons.math3.analysis.function.Min;
+import org.apache.flink.api.common.functions.FlatMapFunction;
 import org.apache.flink.api.common.functions.MapFunction;
+import org.apache.flink.api.common.serialization.SerializationSchema;
 import org.apache.flink.api.java.DataSet;
 import org.apache.flink.api.java.ExecutionEnvironment;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import www.pyn.bean.SimilarityTuple;
+import org.apache.flink.util.Collector;
+import org.ujmp.core.DenseMatrix;
+import org.ujmp.core.Matrix;
+import www.pyn.bean.*;
 
 import java.io.DataInputStream;
 import java.io.InputStream;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 class PQ {
     double acc;
@@ -24,83 +31,115 @@ class PQ {
 
 public class Main {
 
+    public static PrimitiveData generatePrimitiveData(double[] data) {
+        Matrix viewMatrix = DenseMatrix.Factory.zeros(4,4);
+        int idx = 2;
+        for(int i = 0; i < viewMatrix.getRowCount(); i++) {
+            for(int j = 0; j < viewMatrix.getColumnCount(); j++) {
+                viewMatrix.setAsDouble(data[idx++], i ,j);
+            }
+        }
+        Matrix bMatrix = DenseMatrix.Factory.zeros(4,4);
+        idx = 2;
+        for(int i = 0; i < bMatrix.getRowCount(); i++) {
+            for(int j = 0; j < bMatrix.getColumnCount(); j++) {
+                bMatrix.setAsDouble(data[idx++], i ,j);
+            }
+        }
+        for(int i = 0; i < 3; i++) {
+            bMatrix.setAsDouble(0, 3, i);
+        }
+        Matrix tMatrix = viewMatrix.mtimes(bMatrix.inv());
+        PrimitiveData primitiveData = new PrimitiveData((int)data[0],
+                -tMatrix.getAsDouble(3,0),  -tMatrix.getAsDouble(3,1), -tMatrix.getAsDouble(3,2),
+                viewMatrix.getAsDouble(0, 2), viewMatrix.getAsDouble(1, 2), viewMatrix.getAsDouble(2, 2));
+        return primitiveData;
+//        System.out.println(viewMatrix);
+//        System.out.println(bMatrix);
+//        System.out.println(primitiveData);
+    }
+
     public static void main(String[] args) throws Exception {
         String ip = "10.222.163.208" ;
         int port = 6001;
 
-//        Socket socket = new Socket(ip, port);
-//        System.out.println("连上服务器");
-//        InputStream input = socket.getInputStream();
-//        byte[] res = new byte[10];
-//        int len = input.read(res);
-//        System.out.println("len , ret : " + len + " " + new String(res));
-//        input.close();
-//        socket.close();
+        ExecutionEnvironment env;
+        ParameterTool params;
 
-//        ExecutionEnvironment env;
-//        ParameterTool params;
+        params = ParameterTool.fromArgs(args);
+        env = ExecutionEnvironment.getExecutionEnvironment();
+        env.getConfig().setGlobalJobParameters(params);
+
+        PrepareData prepareData = PrepareData.getInstance(env);
+        PrepareResult prepareResult = PrepareResult.getInstance(env);
+
+//        CollaborativeFiltering collaborativeFiltering = new CollaborativeFiltering(params, env, prepareData, prepareResult);
+//        collaborativeFiltering.solveCollaborativeFiltering();
 //
-//        params = ParameterTool.fromArgs(args);
-//        env = ExecutionEnvironment.getExecutionEnvironment();
-//        env.getConfig().setGlobalJobParameters(params);
-//
-//        PrepareData prepareData = PrepareData.getInstance(env);
-//        PrepareResult prepareResult = PrepareResult.getInstance(env);
+//        Recommender recommender = new Recommender(params, env, prepareData, prepareResult);
+//        recommender.solveRecommender();
+
+        Knn knn = new Knn(params, env, prepareData, prepareResult);
+//        knn.solveKnn();
+
 //        System.out.println("train_size " + prepareData.getTrainPosition().size());
 //        System.out.println("result_size " + prepareResult.getTrainResult().size());
 
         StreamExecutionEnvironment senv = StreamExecutionEnvironment.getExecutionEnvironment();
-
-        DataStream<byte[]> bytes = senv.addSource(new SocketByteStreamFunction(ip, port,0L));
-
-        bytes.map(new MapFunction<byte[], Object>() {
-            public Object map(byte[] bytes) throws Exception {
+        DataStream<byte[]> bytes = senv.addSource(new SocketByteStreamFunction(ip, port,18*4,0L));
+        DataStream<Result> result = bytes.flatMap(new FlatMapFunction<byte[], Result>() {
+            public void flatMap(byte[] bytes, Collector<Result> collector) throws Exception {
                 System.out.println("size : " + bytes.length);
-//                for(int i = 0; i < bytes.length; i++) {
-//                    System.out.println(bytes[i]&0xff);
-//                }
+                int idx = 0;
+                double[] data = new double[18];
                 int i = 0;
                 while(i < bytes.length) {
                     int num = ((bytes[i+3]&0xff) << 24) | ((bytes[i+2]&0xff) << 16) | ((bytes[i+1]&0xff) << 8) | (bytes[i]&0xff);
                     double num1 = num*1.0/1000000;
                     i += 4;
+                    data[idx++] = num1;
 //                    System.out.println("num1 : " + num1);
                 }
-                return 10;
+                PrimitiveData primitiveData = generatePrimitiveData(data);
+//                System.out.println(primitiveData);
+                int dataId = primitiveData.getDataId();
+                Position position = primitiveData.getPosition();
+                Direction direction = primitiveData.getDirection();
+//            System.out.println("testDataId : " + dataId + " " + position + " " + direction);
+                Set<Integer> visibleObjSet = new HashSet<Integer>();
+                visibleObjSet.clear();
+                int k = 3;
+                List<SimilarityTuple> kNearestNeighbors = Tools.getNearestNeighbors(Knn.getTrainPosition(), position, k,
+                        1, 15, Knn.getTrainDirection(), direction);
+
+                for(i = 0; i < kNearestNeighbors.size(); i++) {
+                    int simId = kNearestNeighbors.get(i).dataId;
+//                System.out.println(dataId + " " + simId + " " + kNearestNeighbors[i].simlarity);
+                    Result rs = Knn.getTrainResult().get(simId);
+                    visibleObjSet.addAll(rs.getVisibleObj());
+                }
+                collector.collect(new Result(dataId,new ArrayList<Integer>(visibleObjSet)));
+                System.out.println("dataId : " + dataId);
             }
         });
 
-        DataStream<String> text = senv.socketTextStream(ip, port, "\n");
-//        text.map(new MapFunction<String, Object>() {
-//            public Object map(String s) throws Exception {
-//
-//                byte[] buffer = s.getBytes();
-//                System.out.println("size : " + buffer.length);
-////                for(int i = 0; i < chs.length; i++) {
-////                    System.out.println((int)chs[i]);
-////                }
-//                int i = 0;
-//                while(i < 68) {
-//                    int num = ((buffer[i+3]&0xff) << 24) | ((buffer[i+2]&0xff) << 16) | ((buffer[i+1]&0xff) << 8) | (buffer[i]&0xff);
-//                    double num1 = num*1.0/1000000;
-//                    i += 4;
-//                    System.out.println("num1 : " + num1);
-//                }
-//                return 10;
-//            }
-//        });
+
+
+        result.writeToSocket(ip, port, new SerializationSchema<Result>() {
+            public byte[] serialize(Result result) {
+                int dataId = result.getDataId();
+                byte[] buffer = new byte[4];
+                buffer[0] = (byte) (dataId & 0xff);
+                buffer[1] = (byte) ((dataId >> 8 ) & 0xff);
+                buffer[2] = (byte) ((dataId >> 16 ) & 0xff);
+                buffer[3] = (byte) ((dataId >> 24 ) & 0xff);
+                return buffer;
+            }
+        });
         senv.execute("test");
 
 
-//        CollaborativeFiltering collaborativeFiltering = new CollaborativeFiltering(params, env, prepareData, prepareResult);
-//        collaborativeFiltering.solveCollaborativeFiltering();
 
-//        Recommender recommender = new Recommender(params, env, prepareData, prepareResult);
-//        recommender.solveRecommender();
-//        Knn knn = new Knn(params, env, prepareData, prepareResult);
-//        knn.solveKnn();
-//        knn.test();
-//
 
 //        final ParameterTool params = ParameterTool.fromArgs(args);
 //        // set up the execution environment
@@ -148,4 +187,15 @@ public class Main {
 //            counts.print();
 //        }
     }
+
+    public static final class sendMap implements MapFunction<Result, Object> {
+        public Object map(Result result) throws Exception {
+
+            return null;
+        }
+    }
+
+
+
+
 }
