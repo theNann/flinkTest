@@ -61,6 +61,13 @@ public class Main {
 //        System.out.println(primitiveData);
     }
 
+    public static void generaterBuffer(byte[] buffer, int idx, int data) {
+        buffer[idx*4] = (byte) (data & 0xff);
+        buffer[idx*4+1] = (byte) ((data >> 8 ) & 0xff);
+        buffer[idx*4+2] = (byte) ((data >> 16 ) & 0xff);
+        buffer[idx*4+3] = (byte) ((data >> 24 ) & 0xff);
+    }
+
     public static void main(String[] args) throws Exception {
         String ip = "10.222.163.208" ;
         int port = 6001;
@@ -88,9 +95,7 @@ public class Main {
 //        System.out.println("result_size " + prepareResult.getTrainResult().size());
 
         StreamExecutionEnvironment senv = StreamExecutionEnvironment.getExecutionEnvironment();
-        Socket socket = new Socket();
-        socket.connect(new InetSocketAddress(ip, port), 0);
-        DataStream<byte[]> bytes = senv.addSource(new SocketByteStreamFunction(socket, 18*4,0L));
+        DataStream<byte[]> bytes = senv.addSource(new SocketByteStreamFunction(ip, port, 18*4,0L));
 
         DataStream<Result> result = bytes.flatMap(new FlatMapFunction<byte[], Result>() {
             public void flatMap(byte[] bytes, Collector<Result> collector) throws Exception {
@@ -103,7 +108,7 @@ public class Main {
                     double num1 = num*1.0/1000000;
                     i += 4;
                     data[idx++] = num1;
-                    System.out.println("num1 : " + num1);
+//                    System.out.println("num1 : " + num1);
                 }
                 PrimitiveData primitiveData = generatePrimitiveData(data);
 //                System.out.println(primitiveData);
@@ -128,19 +133,19 @@ public class Main {
             }
         });
 
-
-
-//        result.writeToSocket(ip, port, new SerializationSchema<Result>() {
-//            public byte[] serialize(Result result) {
-//                int dataId = result.getDataId();
-//                byte[] buffer = new byte[4];
-//                buffer[0] = (byte) (dataId & 0xff);
-//                buffer[1] = (byte) ((dataId >> 8 ) & 0xff);
-//                buffer[2] = (byte) ((dataId >> 16 ) & 0xff);
-//                buffer[3] = (byte) ((dataId >> 24 ) & 0xff);
-//                return buffer;
-//            }
-//        });
+        result.writeToSocket(ip, port, new SerializationSchema<Result>() {
+            public byte[] serialize(Result result) {
+                int len = result.getVisibleObj().size()+2;
+                System.out.println("len : " + len);
+                byte[] buffer = new byte[len*4];
+                generaterBuffer(buffer, 0, len);
+                generaterBuffer(buffer, 1, result.getDataId());
+                for(int i = 0; i < result.getVisibleObj().size(); i++) {
+                    generaterBuffer(buffer, i+2, result.getVisibleObj().get(i));
+                }
+                return buffer;
+            }
+        });
         senv.execute("test");
 
 
