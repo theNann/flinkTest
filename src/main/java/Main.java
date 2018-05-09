@@ -7,6 +7,7 @@ import org.apache.flink.api.java.ExecutionEnvironment;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.streaming.api.functions.source.SocketTextStreamFunction;
 import org.apache.flink.util.Collector;
 import org.ujmp.core.DenseMatrix;
 import org.ujmp.core.Matrix;
@@ -14,6 +15,7 @@ import www.pyn.bean.*;
 
 import java.io.DataInputStream;
 import java.io.InputStream;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -86,7 +88,10 @@ public class Main {
 //        System.out.println("result_size " + prepareResult.getTrainResult().size());
 
         StreamExecutionEnvironment senv = StreamExecutionEnvironment.getExecutionEnvironment();
-        DataStream<byte[]> bytes = senv.addSource(new SocketByteStreamFunction(ip, port,18*4,0L));
+        Socket socket = new Socket();
+        socket.connect(new InetSocketAddress(ip, port), 0);
+        DataStream<byte[]> bytes = senv.addSource(new SocketByteStreamFunction(socket, 18*4,0L));
+
         DataStream<Result> result = bytes.flatMap(new FlatMapFunction<byte[], Result>() {
             public void flatMap(byte[] bytes, Collector<Result> collector) throws Exception {
                 System.out.println("size : " + bytes.length);
@@ -98,7 +103,7 @@ public class Main {
                     double num1 = num*1.0/1000000;
                     i += 4;
                     data[idx++] = num1;
-//                    System.out.println("num1 : " + num1);
+                    System.out.println("num1 : " + num1);
                 }
                 PrimitiveData primitiveData = generatePrimitiveData(data);
 //                System.out.println(primitiveData);
@@ -125,17 +130,17 @@ public class Main {
 
 
 
-        result.writeToSocket(ip, port, new SerializationSchema<Result>() {
-            public byte[] serialize(Result result) {
-                int dataId = result.getDataId();
-                byte[] buffer = new byte[4];
-                buffer[0] = (byte) (dataId & 0xff);
-                buffer[1] = (byte) ((dataId >> 8 ) & 0xff);
-                buffer[2] = (byte) ((dataId >> 16 ) & 0xff);
-                buffer[3] = (byte) ((dataId >> 24 ) & 0xff);
-                return buffer;
-            }
-        });
+//        result.writeToSocket(ip, port, new SerializationSchema<Result>() {
+//            public byte[] serialize(Result result) {
+//                int dataId = result.getDataId();
+//                byte[] buffer = new byte[4];
+//                buffer[0] = (byte) (dataId & 0xff);
+//                buffer[1] = (byte) ((dataId >> 8 ) & 0xff);
+//                buffer[2] = (byte) ((dataId >> 16 ) & 0xff);
+//                buffer[3] = (byte) ((dataId >> 24 ) & 0xff);
+//                return buffer;
+//            }
+//        });
         senv.execute("test");
 
 
