@@ -32,10 +32,10 @@ public class PrepareData {
     private HashMap<Integer, Position> trainPosition;
     private HashMap<Integer, Direction> trainDirection;
     private DataSet<PrimitiveData> testDataDS;
-    private String trainFilePath = "E:\\BIMRecommed\\input\\data_train.csv";
-    private String testFilePath = "E:\\BIMRecommed\\input\\data_test.csv";
-//    private String trainFilePath = "/home/pyn/Desktop/BIMRecommed/input/data_train.csv";
-//    private String testFilePath = "/home/pyn/Desktop/BIMRecommed/input/data_test.csv";
+//    private String trainFilePath = "E:\\BIMRecommed\\input\\data_train.csv";
+//    private String testFilePath = "E:\\BIMRecommed\\input\\data_test.csv";
+    private String trainFilePath = "/home/pyn/Desktop/BIMRecommed/input/data_train.csv";
+    private String testFilePath = "/home/pyn/Desktop/BIMRecommed/input/data_test.csv";
     private static PrepareData prepareData = null;
     private PrepareData(ExecutionEnvironment env) {
         this.env  = env;

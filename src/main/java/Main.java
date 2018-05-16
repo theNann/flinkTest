@@ -13,8 +13,7 @@ import org.ujmp.core.DenseMatrix;
 import org.ujmp.core.Matrix;
 import www.pyn.bean.*;
 
-import java.io.DataInputStream;
-import java.io.InputStream;
+import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -69,8 +68,8 @@ public class Main {
     }
 
     public static void main(String[] args) throws Exception {
-//        String ip = "10.222.163.208" ;
-        String ip = "127.0.0.1" ;
+        String ip = "10.222.163.208" ;
+//        String ip = "127.0.0.1" ;
         int port = 6001;
 
         ExecutionEnvironment env;
@@ -136,17 +135,38 @@ public class Main {
 
         result.writeToSocket(ip, 6002, new SerializationSchema<Result>() {
             public byte[] serialize(Result re) {
-//                int len = result.getVisibleObj().size()+2;
-//                System.out.println("len : " + len);
-//                byte[] buffer = new byte[len*4];
-//                generaterBuffer(buffer, 0, len);
-//                generaterBuffer(buffer, 1, result.getDataId());
-//                for(int i = 0; i < result.getVisibleObj().size(); i++) {
-//                    generaterBuffer(buffer, i+2, result.getVisibleObj().get(i));
+                int len = re.getVisibleObj().size()+1;
+                System.out.println("len : " + len);
+                byte[] buffer = new byte[(len+1)*4];
+                generaterBuffer(buffer, 0, len);
+                generaterBuffer(buffer, 1, re.getDataId());
+                for(int i = 0; i < re.getVisibleObj().size(); i++) {
+                    int tmp = re.getVisibleObj().get(i);
+                    generaterBuffer(buffer, i+2, tmp);
+                }
+//                File file = new File("/home/pyn/Desktop/out.txt");
+//                FileOutputStream in;
+//                try {
+//                    in = new FileOutputStream(file);
+//                    String start = "start ";
+//                    in.write(start.getBytes());
+//                    for(int i = 0; i < re.getVisibleObj().size(); i++) {
+//                        int tmp = re.getVisibleObj().get(i);
+//                        byte[] bt = String.valueOf(tmp).concat(", ").getBytes();
+//                        in.write(bt, 0 ,bt.length);
+//                        generaterBuffer(buffer, i+2, tmp);
+//                    }
+//                    in.close();
+//                } catch (FileNotFoundException e) {
+//                    e.printStackTrace();
+//                } catch (IOException e) {
+//                    e.printStackTrace();
 //                }
 
-                byte[] buffer = new byte[4];
-                generaterBuffer(buffer, 0, re.getDataId());
+//                byte[] buffer = new byte[4*3];
+//                generaterBuffer(buffer, 0, 2);
+//                generaterBuffer(buffer, 1, 0);
+//                generaterBuffer(buffer, 2, 1);
 
                 return buffer;
             }
