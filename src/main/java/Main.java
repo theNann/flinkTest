@@ -69,7 +69,8 @@ public class Main {
     }
 
     public static void main(String[] args) throws Exception {
-        String ip = "10.222.163.208" ;
+//        String ip = "10.222.163.208" ;
+        String ip = "127.0.0.1" ;
         int port = 6001;
 
         ExecutionEnvironment env;
@@ -99,7 +100,7 @@ public class Main {
 
         DataStream<Result> result = bytes.flatMap(new FlatMapFunction<byte[], Result>() {
             public void flatMap(byte[] bytes, Collector<Result> collector) throws Exception {
-                System.out.println("size : " + bytes.length);
+//                System.out.println("size : " + bytes.length);
                 int idx = 0;
                 double[] data = new double[18];
                 int i = 0;
@@ -133,16 +134,20 @@ public class Main {
             }
         });
 
-        result.writeToSocket(ip, port, new SerializationSchema<Result>() {
-            public byte[] serialize(Result result) {
-                int len = result.getVisibleObj().size()+2;
-                System.out.println("len : " + len);
-                byte[] buffer = new byte[len*4];
-                generaterBuffer(buffer, 0, len);
-                generaterBuffer(buffer, 1, result.getDataId());
-                for(int i = 0; i < result.getVisibleObj().size(); i++) {
-                    generaterBuffer(buffer, i+2, result.getVisibleObj().get(i));
-                }
+        result.writeToSocket(ip, 6002, new SerializationSchema<Result>() {
+            public byte[] serialize(Result re) {
+//                int len = result.getVisibleObj().size()+2;
+//                System.out.println("len : " + len);
+//                byte[] buffer = new byte[len*4];
+//                generaterBuffer(buffer, 0, len);
+//                generaterBuffer(buffer, 1, result.getDataId());
+//                for(int i = 0; i < result.getVisibleObj().size(); i++) {
+//                    generaterBuffer(buffer, i+2, result.getVisibleObj().get(i));
+//                }
+
+                byte[] buffer = new byte[4];
+                generaterBuffer(buffer, 0, re.getDataId());
+
                 return buffer;
             }
         });

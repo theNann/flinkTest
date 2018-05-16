@@ -14,10 +14,10 @@ public class PrepareResult {
     private ExecutionEnvironment env;
     private HashMap<Integer,Result> trainResult;
     private HashMap<Integer,Result> testResult;
-//    private String trainFilePath = "E:\\BIMRecommed\\input\\target_train.txt";
-//    private String testFilePath = "E:\\BIMRecommed\\input\\target_test.txt";
-    private String trainFilePath = "/home/pyn/Desktop/BIMRecommed/input/target_train.txt";
-    private String testFilePath = "/home/pyn/Desktop/BIMRecommed/input/target_test.txt";
+    private String trainFilePath = "E:\\BIMRecommed\\input\\target_train.txt";
+    private String testFilePath = "E:\\BIMRecommed\\input\\target_test.txt";
+//    private String trainFilePath = "/home/pyn/Desktop/BIMRecommed/input/target_train.txt";
+//    private String testFilePath = "/home/pyn/Desktop/BIMRecommed/input/target_test.txt";
     private static PrepareResult prepareResult = null;
 
     private PrepareResult(ExecutionEnvironment env) {
