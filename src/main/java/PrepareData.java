@@ -21,11 +21,11 @@ import java.util.List;
 //TODO 之后添加一个工具包，计算两个向量之前的相似度，以及两个集合之间的相似度(已完成)
 //TODO 调试为什么knn-8中选取5个邻居的acc和recall与python版本结果不同，猜测是因为position应该改成欧几里得距离而不是cosine（已完成）
 //TODO 添加推荐算法(已完成)
-//TODO 增加更多的训练和测试数据
 //TODO 加快效率，要能做到每秒30帧（每个测试数据30ms得出结果）（已完成，协同过滤每秒计算79次，KNN结合协同过滤每秒计算27次）:
 //TODO 1）KNN和推荐时可用小顶堆维护求TopK问题(尚无明显效果，当前训练集数目不多，排序也挺快) 2）集合运算优化，使用Hashmap求交并 3)用List代替Set存储结果集，大大提高了效率
-//TODO 实现OcclusionCulling与FLink的socket帧数据的通信（进行中）
-//TODO 给每帧数据编号，Flink这边能按编号顺序发送结果
+//TODO 实现OcclusionCulling与FLink的socket帧数据的通信（已完成）
+//TODO 给每帧数据编号，Flink这边能按编号顺序发送结果，並且能在OcclusionCulling中顯示（已完成，使用writeToSocket API）
+//TODO 增加更多的训练和测试数据，着重提高recall
 @SuppressWarnings("serial")
 public class PrepareData {
     private ExecutionEnvironment env;
