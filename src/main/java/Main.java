@@ -21,44 +21,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-class PQ {
-    double acc;
-    double recall;
-    public PQ(double acc, double recall) {
-        this.acc = acc;
-        this.recall = recall;
-    }
-}
 
 public class Main {
-
-    public static PrimitiveData generatePrimitiveData(double[] data) {
-        Matrix viewMatrix = DenseMatrix.Factory.zeros(4,4);
-        int idx = 2;
-        for(int i = 0; i < viewMatrix.getRowCount(); i++) {
-            for(int j = 0; j < viewMatrix.getColumnCount(); j++) {
-                viewMatrix.setAsDouble(data[idx++], i ,j);
-            }
-        }
-        Matrix bMatrix = DenseMatrix.Factory.zeros(4,4);
-        idx = 2;
-        for(int i = 0; i < bMatrix.getRowCount(); i++) {
-            for(int j = 0; j < bMatrix.getColumnCount(); j++) {
-                bMatrix.setAsDouble(data[idx++], i ,j);
-            }
-        }
-        for(int i = 0; i < 3; i++) {
-            bMatrix.setAsDouble(0, 3, i);
-        }
-        Matrix tMatrix = viewMatrix.mtimes(bMatrix.inv());
-        PrimitiveData primitiveData = new PrimitiveData((int)data[0],
-                -tMatrix.getAsDouble(3,0),  -tMatrix.getAsDouble(3,1), -tMatrix.getAsDouble(3,2),
-                viewMatrix.getAsDouble(0, 2), viewMatrix.getAsDouble(1, 2), viewMatrix.getAsDouble(2, 2));
-        return primitiveData;
-//        System.out.println(viewMatrix);
-//        System.out.println(bMatrix);
-//        System.out.println(primitiveData);
-    }
 
     public static void generaterBuffer(byte[] buffer, int idx, int data) {
         buffer[idx*4] = (byte) (data & 0xff);
@@ -68,7 +32,7 @@ public class Main {
     }
 
     public static void main(String[] args) throws Exception {
-        String ip = "10.222.163.208" ;
+        String ip = "10.222.140.17" ;
 //        String ip = "127.0.0.1" ;
         int port = 6001;
 
@@ -97,41 +61,14 @@ public class Main {
         StreamExecutionEnvironment senv = StreamExecutionEnvironment.getExecutionEnvironment();
         DataStream<byte[]> bytes = senv.addSource(new SocketByteStreamFunction(ip, port, 18*4,0L));
 
-        DataStream<Result> result = bytes.flatMap(new FlatMapFunction<byte[], Result>() {
-            public void flatMap(byte[] bytes, Collector<Result> collector) throws Exception {
-//                System.out.println("size : " + bytes.length);
-                int idx = 0;
-                double[] data = new double[18];
-                int i = 0;
-                while(i < bytes.length) {
-                    int num = ((bytes[i+3]&0xff) << 24) | ((bytes[i+2]&0xff) << 16) | ((bytes[i+1]&0xff) << 8) | (bytes[i]&0xff);
-                    double num1 = num*1.0/1000000;
-                    i += 4;
-                    data[idx++] = num1;
-//                    System.out.println("num1 : " + num1);
-                }
-                PrimitiveData primitiveData = generatePrimitiveData(data);
-//                System.out.println(primitiveData);
-                int dataId = primitiveData.getDataId();
-                Position position = primitiveData.getPosition();
-                Direction direction = primitiveData.getDirection();
-//            System.out.println("testDataId : " + dataId + " " + position + " " + direction);
-                Set<Integer> visibleObjSet = new HashSet<Integer>();
-                visibleObjSet.clear();
-                int k = 3;
-                List<SimilarityTuple> kNearestNeighbors = Tools.getNearestNeighbors(Knn.getTrainPosition(), position, k,
-                        1, 15, Knn.getTrainDirection(), direction);
-
-                for(i = 0; i < kNearestNeighbors.size(); i++) {
-                    int simId = kNearestNeighbors.get(i).dataId;
-//                System.out.println(dataId + " " + simId + " " + kNearestNeighbors[i].simlarity);
-                    Result rs = Knn.getTrainResult().get(simId);
-                    visibleObjSet.addAll(rs.getVisibleObj());
-                }
-                collector.collect(new Result(dataId,new ArrayList<Integer>(visibleObjSet)));
-                System.out.println("dataId : " + dataId);
+        DataStream<PrimitiveData> primitiveDataDataStream = bytes.flatMap(new FlatMapFunction<byte[], PrimitiveData>() {
+            public void flatMap(byte[] bytes, Collector<PrimitiveData> collector) throws Exception {
+                PrimitiveData primitiveData = PrimitiveData.primitiveDataFromBytes(bytes);
+                collector.collect(primitiveData);
             }
         });
+
+        DataStream<Result> result = primitiveDataDataStream.flatMap(new Knn.knnMap());
 
         result.writeToSocket(ip, 6002, new SerializationSchema<Result>() {
             public byte[] serialize(Result re) {
@@ -222,15 +159,4 @@ public class Main {
 //            counts.print();
 //        }
     }
-
-    public static final class sendMap implements MapFunction<Result, Object> {
-        public Object map(Result result) throws Exception {
-
-            return null;
-        }
-    }
-
-
-
-
 }

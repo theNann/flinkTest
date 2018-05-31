@@ -136,6 +136,7 @@ public class Knn {
                 visibleObjSet.addAll(rs.getVisibleObj());
             }
             collector.collect(new Result(dataId,new ArrayList<Integer>(visibleObjSet)));
+            System.out.println("dataId : " + dataId);
         }
     }
 
