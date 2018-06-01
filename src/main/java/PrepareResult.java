@@ -14,23 +14,23 @@ public class PrepareResult {
     private ExecutionEnvironment env;
     private HashMap<Integer,Result> trainResult;
     private HashMap<Integer,Result> testResult;
-//    private String trainFilePath = "E:\\BIMRecommed\\input\\target_train.txt";
-//    private String testFilePath = "E:\\BIMRecommed\\input\\target_test.txt";
-    private String trainFilePath = "/home/pyn/Desktop/BIMRecommed/input/target_train.txt";
-    private String testFilePath = "/home/pyn/Desktop/BIMRecommed/input/target_test.txt";
+    private String trainFilePath;
+    private String testFilePath;
     private static PrepareResult prepareResult = null;
 
-    private PrepareResult(ExecutionEnvironment env) {
+    private PrepareResult(ExecutionEnvironment env, String trainFilePath, String testFilePath) {
         this.env = env;
+        this.trainFilePath = trainFilePath;
+        this.testFilePath = testFilePath;
         trainResult = new HashMap<Integer, Result>();
         testResult = new HashMap<Integer, Result>();
         readTrainResult();
         readTestResult();
     }
 
-    public static PrepareResult getInstance(ExecutionEnvironment env) {
+    public static PrepareResult getInstance(ExecutionEnvironment env, String trainFilePath, String testFilePath) {
         if(prepareResult == null) {
-            prepareResult = new PrepareResult(env);
+            prepareResult = new PrepareResult(env, trainFilePath, testFilePath);
         }
         return prepareResult;
     }

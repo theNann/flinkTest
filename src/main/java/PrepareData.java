@@ -32,23 +32,25 @@ public class PrepareData {
     private HashMap<Integer, Position> trainPosition;
     private HashMap<Integer, Direction> trainDirection;
     private DataSet<PrimitiveData> testDataDS;
-//    private String trainFilePath = "E:\\BIMRecommed\\input\\data_train.csv";
-//    private String testFilePath = "E:\\BIMRecommed\\input\\data_test.csv";
-    private String trainFilePath = "/home/pyn/Desktop/BIMRecommed/input/data_train.csv";
-    private String testFilePath = "/home/pyn/Desktop/BIMRecommed/input/data_test.csv";
+    private HashMap<Integer, PrimitiveData> testData;
+    private String trainFilePath;
+    private String testFilePath;
     private static PrepareData prepareData = null;
-    private PrepareData(ExecutionEnvironment env) {
+    private PrepareData(ExecutionEnvironment env, String trainFilePath, String testFilePath) {
         this.env  = env;
+        this.trainFilePath = trainFilePath;
+        this.testFilePath = testFilePath;
         trainPosition = new HashMap<Integer, Position>();
         trainDirection = new HashMap<Integer, Direction>();
+        testData = new HashMap<Integer, PrimitiveData>();
         readTrainPosition();
         readTrainDirection();
         readTestData();
     }
 
-    public static PrepareData getInstance(ExecutionEnvironment env) {
+    public static PrepareData getInstance(ExecutionEnvironment env, String trainFilePath, String testFilePath) {
         if(prepareData == null) {
-            prepareData = new PrepareData(env);
+            prepareData = new PrepareData(env, trainFilePath, testFilePath);
         } else {
             return prepareData;
         }
@@ -96,18 +98,18 @@ public class PrepareData {
                 .includeFields("1111111000")
                 .pojoType(PrimitiveData.class, "dataId", "px", "py", "pz", "dx", "dy", "dz");
 
-//        DataSet<Result> rs = testPositionDS.flatMap(new FlatMapFunction<Position, Result>() {
-//                    public void flatMap(Position position, Collector<Result> collector) throws Exception {
-//                        int dataId = position.getDataId();
-//                        System.out.println("dataId : " + dataId);
-//                        collector.collect(new Result(dataId, new ArrayList<Integer>()));
-//                    }
-//                });
-//        try {
-//            rs.print();
-//        } catch (Exception e) {
-//
-//        }
+        try {
+            List<PrimitiveData> list = testDataDS.collect();
+            System.out.println("tesetData Collect!!!!!!!!!!!!!!!!!!!!!!!!!");
+            testData.clear();
+            for(int i = 0; i < list.size(); i++) {
+                int dataId = list.get(i).getDataId();
+                testData.put(dataId, list.get(i));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
     }
 
     public ExecutionEnvironment getEnv() {
@@ -141,4 +143,9 @@ public class PrepareData {
     public void setTestFilePath(String filePath) {
         testFilePath = filePath;
     }
+
+    public HashMap<Integer, PrimitiveData> getTestData() {
+        return testData;
+    }
+
 }

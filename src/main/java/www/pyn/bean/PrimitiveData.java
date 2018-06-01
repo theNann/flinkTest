@@ -17,12 +17,12 @@ public class PrimitiveData implements Serializable {
     public PrimitiveData() {};
     public PrimitiveData(int dataId, double px, double py, double pz, double dx, double dy, double dz) {
         this.dataId = dataId;
-        this.dx = dx;
-        this.dy = dy;
-        this.dz = dz;
         this.px = px;
         this.py = py;
         this.pz = pz;
+        this.dx = dx;
+        this.dy = dy;
+        this.dz = dz;
     }
 
     public int getDataId() {

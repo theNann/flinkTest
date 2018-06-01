@@ -1,9 +1,14 @@
+import com.opencsv.CSVWriter;
+import com.opencsv.bean.StatefulBeanToCsv;
+import com.opencsv.bean.StatefulBeanToCsvBuilder;
+import com.opencsv.exceptions.CsvDataTypeMismatchException;
+import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
 import org.apache.commons.math3.linear.ArrayRealVector;
-import www.pyn.bean.Direction;
-import www.pyn.bean.Position;
-import www.pyn.bean.Result;
-import www.pyn.bean.SimilarityTuple;
+import org.apache.flink.api.java.DataSet;
+import org.apache.flink.api.java.tuple.Tuple3;
+import www.pyn.bean.*;
 
+import java.io.*;
 import java.util.*;
 
 /**
@@ -224,5 +229,129 @@ public class Tools {
 
     public static double calF1(double acc, double recall) {
         return 2*acc*recall / (acc + recall);
+    }
+
+    public static void expandTrainSet(DataSet<Tuple3<Integer, Double, Double>> scores, HashMap<Integer,PrimitiveData> testData,
+                                      HashMap<Integer, Result> testResult, int startDataId) {
+        List<PrimitiveData> expandData = new ArrayList<PrimitiveData>();
+        List<Result> expandResult = new ArrayList<Result>();
+        try {
+            List<Tuple3<Integer, Double, Double>> list = scores.collect();
+            for(int i = 0; i < list.size(); i++) {
+                if(list.get(i).f1 < 0.5 || list.get(i).f2 < 0.5) {
+                    int dataId = list.get(i).f0;
+                    expandData.add(testData.get(dataId));
+                    expandResult.add(testResult.get(dataId));
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        String trainDataPath = Configuration.getInstance().getTrainDataPath();//"/home/pyn/Desktop/DataSet/tt.csv"
+        String trainTargetPath = Configuration.getInstance().getTrainTargetPath();//"/home/pyn/Desktop/DataSet/tt_result.txt"
+        writeCSV2(expandData, trainDataPath, startDataId);
+        writeTxt2(expandResult, trainTargetPath, startDataId);
+    }
+
+    public static void writeCSV2(List<PrimitiveData> dataList, String finalPath, int startDataId) {
+        FileOutputStream out = null;
+        OutputStreamWriter osw = null;
+        BufferedWriter bw = null;
+        try {
+            File finalCSVFile = new File(finalPath);
+            out = new FileOutputStream(finalCSVFile, true);
+            osw = new OutputStreamWriter(out, "UTF-8");
+            // 手动加上BOM标识
+            osw.write(new String(new byte[] { (byte) 0xEF, (byte) 0xBB, (byte) 0xBF }));
+            bw = new BufferedWriter(osw);
+            /**
+             * 往CSV中写新数据
+             */
+//            String title = "";
+//            title = "dataId,px,py,pz,dx,dy,dz";
+//            bw.append(title).append("\r");
+
+            if (dataList != null && !dataList.isEmpty()) {
+                for (PrimitiveData data : dataList) {
+                    bw.append((startDataId++) + ",");
+                    bw.append(data.getPx()+",");
+                    bw.append(data.getPy() + ",");
+                    bw.append(data.getPz() + ",");
+                    bw.append(data.getDx() + ",");
+                    bw.append(data.getDy() + ",");
+                    bw.append(data.getDz() + ",");
+                    bw.append(0 + ",");
+                    bw.append(0 + ",");
+                    bw.append(0 + ",");
+                    bw.append("\r");
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (bw != null) {
+                try {
+                    bw.close();
+                    bw = null;
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (osw != null) {
+                try {
+                    osw.close();
+                    osw = null;
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (out != null) {
+                try {
+                    out.close();
+                    out = null;
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+        }
+        System.out.println(finalPath + "数据导出成功");
+    }
+
+    public static void writeTxt2(List<Result> dataList, String finalPath, int startDataId) {
+        File file = new File(finalPath);
+        BufferedWriter writer = null;
+        try {
+            if(file.isFile()&&!file.exists()){
+                System.out.println("找不到指定的文件");
+                file.createNewFile();// 不存在则创建
+            }
+            else{
+                writer = new BufferedWriter(new FileWriter(file,true)); //这里加入true 可以不覆盖原有TXT文件内容 续写
+                for(int i = 0; i < dataList.size(); i++) {
+                    StringBuffer content = new StringBuffer("");
+                    content.append(startDataId++);
+                    for(int j = 0; j < dataList.get(i).getVisibleObj().size(); j++) {
+                        content.append(", ");
+                        content.append(dataList.get(i).getVisibleObj().get(j));
+                    }
+                    writer.write(new String(content));
+                    writer.write("\n");
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (writer != null) {
+                try {
+                    writer.flush();
+                    writer.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
     }
 }

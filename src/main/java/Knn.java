@@ -13,6 +13,7 @@ import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.core.fs.FileSystem;
 import org.apache.flink.util.Collector;
 import org.omg.CORBA.Environment;
+import scala.concurrent.Promise;
 import www.pyn.bean.*;
 
 import java.util.*;
@@ -23,29 +24,30 @@ public class Knn {
     private static HashMap<Integer, Position> trainPosition;
     private static HashMap<Integer, Direction> trainDirection;
     private DataSet<PrimitiveData> testDataDS;
-    private PrepareData prepareData;
+    private HashMap<Integer, PrimitiveData> testData;
 
     private static HashMap<Integer,Result> trainResult;
     private static HashMap<Integer,Result> testResult;
-    private PrepareResult prepareResult;
+
 
     private ExecutionEnvironment env;
     private ParameterTool params;
+    private String writoTofile = "/home/pyn/Desktop/DataSet/knnScore.csv";
 
     public Knn(ParameterTool params, ExecutionEnvironment env, PrepareData prepareData,
                PrepareResult prepareResult) {
         this.params = params;
         this.env = env;
 
-        prepareData = prepareData;
         trainPosition = prepareData.getTrainPosition();
         trainDirection = prepareData.getTrainDirection();
         testDataDS = prepareData.getTestDataDS();
+        testData = prepareData.getTestData();
 
-        prepareResult = prepareResult;
         trainResult = prepareResult.getTrainResult();
         testResult = prepareResult.getTestResult();
     }
+
     public void test() {
         System.out.println("train " + trainPosition.size() + " " + trainDirection.size() + " " + trainResult.size());
         System.out.println("test " + testResult.size());
@@ -81,6 +83,7 @@ public class Knn {
 //            System.out.println(trainDirection.get(i) + "//////////////////////");
 //        }
     }
+
     public void solveKnn() {
         DataSet<Result> ans = testDataDS.flatMap(new knnMap());
 //        if (params.has("output")) {
@@ -97,8 +100,17 @@ public class Knn {
 //        }
 
         DataSet<Tuple3<Integer, Double, Double>> scores = ans.flatMap(new scoreMap());
-        scores.writeAsCsv("/home/pyn/Desktop/BIMRecommed/output/flinkScoresTmp.csv","\n",",")
+
+
+//        HashMap<Integer, Result> testTarget = prepareResult.getTestResult();
+//        System.out.println("testTarget size : " + testTarget.size());
+//        HashMap<Integer, PrimitiveData> testData = prepareData.getTestData();
+//        System.out.println("testData size : " + testData.size());
+//        Tools.expandTrainSet(scores, testData, testResult, 9472);
+
+        scores.writeAsCsv(writoTofile,"\n",",", FileSystem.WriteMode.OVERWRITE)
                 .setParallelism(1);
+
         try {
             env.execute("FlinkScores");
         } catch (Exception e) {}
@@ -136,7 +148,7 @@ public class Knn {
                 visibleObjSet.addAll(rs.getVisibleObj());
             }
             collector.collect(new Result(dataId,new ArrayList<Integer>(visibleObjSet)));
-            System.out.println("dataId : " + dataId);
+//            System.out.println("dataId : " + dataId);
         }
     }
 
