@@ -13,26 +13,26 @@ public class CollaborativeFiltering {
     private static HashMap<Integer, Position> trainPosition;
     private static HashMap<Integer, Direction> trainDirection;
     private DataSet<PrimitiveData> testDataDS;
-    private PrepareData prepareData;
+    private HashMap<Integer, PrimitiveData> testData;
 
     private static HashMap<Integer,Result> trainResult;
     private static HashMap<Integer,Result> testResult;
-    private PrepareResult prepareResult;
+
 
     private ExecutionEnvironment env;
     private ParameterTool params;
+    private String writoTofile = "/home/pyn/Desktop/DataSet/CFScore.csv";
 
     public CollaborativeFiltering(ParameterTool params, ExecutionEnvironment env, PrepareData prepareData,
                                   PrepareResult prepareResult) {
         this.params = params;
         this.env = env;
 
-        prepareData = prepareData;
         trainPosition = prepareData.getTrainPosition();
         trainDirection = prepareData.getTrainDirection();
         testDataDS = prepareData.getTestDataDS();
+        testData = prepareData.getTestData();
 
-        prepareResult = prepareResult;
         trainResult = prepareResult.getTrainResult();
         testResult = prepareResult.getTestResult();
     }
@@ -40,8 +40,8 @@ public class CollaborativeFiltering {
     public void solveCollaborativeFiltering() {
         DataSet<Result> ans = testDataDS.flatMap(new recommenderMap());
         DataSet<Tuple3<Integer, Double, Double>> scores = ans.flatMap(new scoreMap());
-        scores.writeAsCsv("/home/pyn/Desktop/BIMRecommed/output/ScoresCollaboratTmp.csv","\n",",",
-                FileSystem.WriteMode.OVERWRITE).setParallelism(1);
+        scores.writeAsCsv(writoTofile,"\n",",", FileSystem.WriteMode.OVERWRITE)
+                .setParallelism(1);
         try {
             env.execute("FlinkScores");
         } catch (Exception e) {}
@@ -67,7 +67,7 @@ public class CollaborativeFiltering {
             Direction direction = primitiveData.getDirection();
             List<SimilarityTuple> coldStartNearestNeighbor = Tools.getNearestNeighbors(trainPosition, position, 1,
                     1, 15, trainDirection, direction);
-            Set<Integer> visibleObjSet = new HashSet<Integer>();
+            Set<Integer> visibleObjSet = new HashSet<Integer>(); //看改成list能不能加快，最后单独去重
             visibleObjSet.clear();
             int coldStartDataId = coldStartNearestNeighbor.get(0).dataId;
             for(int i = 0; i < coldStartNearestNeighbor.size(); i++) {
@@ -77,7 +77,7 @@ public class CollaborativeFiltering {
             }
             List<Integer> visibleObjList = new ArrayList<Integer>(visibleObjSet);
             Collections.sort(visibleObjList);
-            int howMany = 3;
+            int howMany = 4;
 //            List<SimilarityTuple> recommendNearestNeighbors = Tools.getNearestNeighbors(trainPosition, position, 3,
 //                    1, 15, trainDirection, direction);
             List<SimilarityTuple> recommendNearestNeighbors = Tools.userBasedRecommend(trainResult, visibleObjList, howMany);

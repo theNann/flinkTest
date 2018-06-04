@@ -106,7 +106,7 @@ public class Knn {
 //        System.out.println("testTarget size : " + testTarget.size());
 //        HashMap<Integer, PrimitiveData> testData = prepareData.getTestData();
 //        System.out.println("testData size : " + testData.size());
-//        Tools.expandTrainSet(scores, testData, testResult, 9472);
+//        Tools.expandTrainSet(scores, testData, testResult, 11454);
 
         scores.writeAsCsv(writoTofile,"\n",",", FileSystem.WriteMode.OVERWRITE)
                 .setParallelism(1);

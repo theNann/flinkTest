@@ -263,7 +263,7 @@ public class Tools {
             out = new FileOutputStream(finalCSVFile, true);
             osw = new OutputStreamWriter(out, "UTF-8");
             // 手动加上BOM标识
-            osw.write(new String(new byte[] { (byte) 0xEF, (byte) 0xBB, (byte) 0xBF }));
+//            osw.write(new String(new byte[] { (byte) 0xEF, (byte) 0xBB, (byte) 0xBF }));
             bw = new BufferedWriter(osw);
             /**
              * 往CSV中写新数据
@@ -284,7 +284,7 @@ public class Tools {
                     bw.append(0 + ",");
                     bw.append(0 + ",");
                     bw.append(0 + ",");
-                    bw.append("\r");
+                    bw.append("\n");
                 }
             }
         } catch (Exception e) {

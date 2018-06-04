@@ -32,18 +32,19 @@ public class Main {
     }
 
     public static void main(String[] args) throws Exception {
+        long startTime = System.currentTimeMillis();
         Configuration.getInstance().setIp("10.222.140.17");
         Configuration.getInstance().setReadPort(6001);
         Configuration.getInstance().setWritePort(6002);
 //        private String trainFilePath = "E:\\BIMRecommed\\input\\data_train.csv";
 //        private String testFilePath = "E:\\BIMRecommed\\input\\data_test.csv";
         String trainDataPath = "/home/pyn/Desktop/BIMRecommed/input/data_train.csv";
-        String testDataPath = "/home/pyn/Desktop/DataSet/data1.csv";
+        String testDataPath = "/home/pyn/Desktop/BIMRecommed/input/data_test.csv";
 //        String testDataPath = "/home/pyn/Desktop/BIMRecommed/input/data_test.csv";
 //        private String trainFilePath = "E:\\BIMRecommed\\input\\target_train.txt";
 //        private String testFilePath = "E:\\BIMRecommed\\input\\target_test.txt";
         String trainTargetPath = "/home/pyn/Desktop/BIMRecommed/input/target_train.txt";
-        String testTargetPath = "/home/pyn/Desktop/DataSet/target1.txt";
+        String testTargetPath = "/home/pyn/Desktop/BIMRecommed/input/target_test.txt";
 //        String testTargetPath = "/home/pyn/Desktop/BIMRecommed/input/target_test.txt";
         Configuration.getInstance().setTrainDataPath(trainDataPath);
         Configuration.getInstance().setTestDataPath(testDataPath);
@@ -59,18 +60,22 @@ public class Main {
 
         PrepareData prepareData = PrepareData.getInstance(env, trainDataPath, testDataPath);
         PrepareResult prepareResult = PrepareResult.getInstance(env, trainTargetPath, testTargetPath);
+        long prepareTime = System.currentTimeMillis();
 
-//        CollaborativeFiltering collaborativeFiltering = new CollaborativeFiltering(params, env, prepareData, prepareResult);
-//        collaborativeFiltering.solveCollaborativeFiltering();
+        CollaborativeFiltering collaborativeFiltering = new CollaborativeFiltering(params, env, prepareData, prepareResult);
+        collaborativeFiltering.solveCollaborativeFiltering();
 //
 //        Recommender recommender = new Recommender(params, env, prepareData, prepareResult);
 //        recommender.solveRecommender();
 
-        Knn knn = new Knn(params, env, prepareData, prepareResult);
-        knn.solveKnn();
+//        Knn knn = new Knn(params, env, prepareData, prepareResult);
+//        knn.solveKnn();
+        long endTime = System.currentTimeMillis();
 
-//        System.out.println("train_size " + prepareData.getTrainPosition().size());
-//        System.out.println("result_size " + prepareResult.getTrainResult().size());
+        System.out.println("Prepare time: " + (prepareTime-startTime)*1.0/1000+"s");
+        System.out.println("Cal time: " + (endTime-prepareTime)*1.0/1000 + "s ,Data size: " + prepareData.getTestData().size());
+//        System.out.println("train_size " + prepareData.getTrainPosition().size()); //11550
+//        System.out.println("test_size " + prepareData.getTestData().size()); // 4852
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
