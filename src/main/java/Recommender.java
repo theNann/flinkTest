@@ -3,6 +3,7 @@ import org.apache.flink.api.java.DataSet;
 import org.apache.flink.api.java.ExecutionEnvironment;
 import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.api.java.utils.ParameterTool;
+import org.apache.flink.core.fs.FileSystem;
 import org.apache.flink.util.Collector;
 import www.pyn.bean.*;
 
@@ -12,26 +13,25 @@ public class Recommender {
     private static HashMap<Integer, Position> trainPosition;
     private static HashMap<Integer, Direction> trainDirection;
     private DataSet<PrimitiveData> testDataDS;
-    private PrepareData prepareData;
+    private HashMap<Integer, PrimitiveData> testData;
 
     private static HashMap<Integer,Result> trainResult;
     private static HashMap<Integer,Result> testResult;
-    private PrepareResult prepareResult;
 
     private ExecutionEnvironment env;
     private ParameterTool params;
+    private String writoTofile = "/home/pyn/Desktop/DataSet/RecomScore.csv";
 
     public Recommender(ParameterTool params, ExecutionEnvironment env, PrepareData prepareData,
                        PrepareResult prepareResult) {
         this.params = params;
         this.env = env;
 
-        prepareData = prepareData;
         trainPosition = prepareData.getTrainPosition();
         trainDirection = prepareData.getTrainDirection();
         testDataDS = prepareData.getTestDataDS();
+        testData = prepareData.getTestData();
 
-        prepareResult = prepareResult;
         trainResult = prepareResult.getTrainResult();
         testResult = prepareResult.getTestResult();
     }
@@ -39,7 +39,7 @@ public class Recommender {
     public void solveRecommender() {
         DataSet<Result> ans = testDataDS.flatMap(new recommenderMap());
         DataSet<Tuple3<Integer, Double, Double>> scores = ans.flatMap(new scoreMap());
-        scores.writeAsCsv("/home/pyn/Desktop/BIMRecommed/output/ScoresCollaboratTmp.csv","\n",",")
+        scores.writeAsCsv(writoTofile,"\n",",", FileSystem.WriteMode.OVERWRITE)
                 .setParallelism(1);
         try {
             env.execute("FlinkScores");
@@ -48,14 +48,14 @@ public class Recommender {
 
     public static final class recommenderMap implements FlatMapFunction<PrimitiveData, Result> {
         public void flatMap(PrimitiveData primitiveData, Collector<Result> collector) throws Exception {
-            int k = 3;
+            int k = 2;
             int howMany = 2;
             int maxK = 15;
             int dataId = primitiveData.getDataId();
             Position position = primitiveData.getPosition();
             Direction direction = primitiveData.getDirection();
-            Set<Integer> visibleObjSet = new HashSet<Integer>();
-            visibleObjSet.clear();
+            List<Integer> visibleObjList = new ArrayList<Integer>();
+            visibleObjList.clear();
             //KNN
             List<SimilarityTuple> kNearestNeighbors = Tools.getNearestNeighbors(trainPosition, position, k,
                     1, maxK, trainDirection, direction);
@@ -67,10 +67,10 @@ public class Recommender {
                 for(int j = 0; j < recommendNearestNeighbors.size(); j++) {
                     int _simId = recommendNearestNeighbors.get(j).dataId;
                     List<Integer> _visibleObj = trainResult.get(_simId).getVisibleObj();
-                    visibleObjSet.addAll(_visibleObj);
+                    visibleObjList.addAll(_visibleObj);
                 }
             }
-            collector.collect(new Result(dataId, new ArrayList<Integer>(visibleObjSet)));
+            collector.collect(new Result(dataId, Tools.removeDuplicateFromList(visibleObjList)));
         }
     }
 

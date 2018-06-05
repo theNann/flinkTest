@@ -39,12 +39,12 @@ public class Main {
 //        private String trainFilePath = "E:\\BIMRecommed\\input\\data_train.csv";
 //        private String testFilePath = "E:\\BIMRecommed\\input\\data_test.csv";
         String trainDataPath = "/home/pyn/Desktop/BIMRecommed/input/data_train.csv";
-        String testDataPath = "/home/pyn/Desktop/BIMRecommed/input/data_test.csv";
+        String testDataPath = "/home/pyn/Desktop/DataSet/data6.csv";
 //        String testDataPath = "/home/pyn/Desktop/BIMRecommed/input/data_test.csv";
 //        private String trainFilePath = "E:\\BIMRecommed\\input\\target_train.txt";
 //        private String testFilePath = "E:\\BIMRecommed\\input\\target_test.txt";
         String trainTargetPath = "/home/pyn/Desktop/BIMRecommed/input/target_train.txt";
-        String testTargetPath = "/home/pyn/Desktop/BIMRecommed/input/target_test.txt";
+        String testTargetPath = "/home/pyn/Desktop/DataSet/target6.txt";
 //        String testTargetPath = "/home/pyn/Desktop/BIMRecommed/input/target_test.txt";
         Configuration.getInstance().setTrainDataPath(trainDataPath);
         Configuration.getInstance().setTestDataPath(testDataPath);
