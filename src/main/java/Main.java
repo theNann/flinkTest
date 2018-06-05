@@ -62,14 +62,14 @@ public class Main {
         PrepareResult prepareResult = PrepareResult.getInstance(env, trainTargetPath, testTargetPath);
         long prepareTime = System.currentTimeMillis();
 
-        CollaborativeFiltering collaborativeFiltering = new CollaborativeFiltering(params, env, prepareData, prepareResult);
-        collaborativeFiltering.solveCollaborativeFiltering();
-//
+//        CollaborativeFiltering collaborativeFiltering = new CollaborativeFiltering(params, env, prepareData, prepareResult);
+//        collaborativeFiltering.solveCollaborativeFiltering();
+
 //        Recommender recommender = new Recommender(params, env, prepareData, prepareResult);
 //        recommender.solveRecommender();
 
-//        Knn knn = new Knn(params, env, prepareData, prepareResult);
-//        knn.solveKnn();
+        Knn knn = new Knn(params, env, prepareData, prepareResult);
+        knn.solveKnn();
         long endTime = System.currentTimeMillis();
 
         System.out.println("Prepare time: " + (prepareTime-startTime)*1.0/1000+"s");

@@ -110,6 +110,7 @@ public class Tools {
         });
         return list;
     }
+
     public static List<SimilarityTuple> getNearestNeighbors(HashMap<Integer, Position> trainPosition, Position position,
                            int minK, int considerDirectiton, int maxK, HashMap<Integer, Direction>trainDirection,
                                                         Direction direction) {
@@ -128,7 +129,7 @@ public class Tools {
                 if(minHeap.getCount() == kk) {
                     minHeap.buildHeap();
                 }
-            } else if(minHeap.getCount() > kk){
+            } else{
                 if(sim > minHeap.arr[0].similarityP) {
                     minHeap.arr[0] = new SimilarityTuple(dataId, sim);
                     minHeap.adjustHeap(0);
@@ -208,7 +209,7 @@ public class Tools {
                 if(minHeap.getCount() == howMany) {
                     minHeap.buildHeap();
                 }
-            } else if(minHeap.getCount() > howMany){
+            } else{
                 if(sim > minHeap.arr[0].similarityP) {
                     minHeap.arr[0] = new SimilarityTuple(dataId, sim);
                     minHeap.adjustHeap(0);
@@ -348,6 +349,20 @@ public class Tools {
                 }
             }
         }
+    }
 
+    public static List<Integer> removeDuplicateFromList(List<Integer> list) {
+        Collections.sort(list);
+        List<Integer> listNoDuplicate = new ArrayList<Integer>();
+        listNoDuplicate.add(list.get(0));
+        int idx = 0;
+        for(int i = 0; i < list.size(); i++) {
+            int tmp = list.get(i);
+            if(tmp != listNoDuplicate.get(idx)) {
+                listNoDuplicate.add(tmp);
+                idx += 1;
+            }
+        }
+        return listNoDuplicate;
     }
 }

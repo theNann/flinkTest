@@ -87,17 +87,7 @@ public class CollaborativeFiltering {
                 visibleObjList.addAll(rs.getVisibleObj());
             }
             //去重
-            Collections.sort(visibleObjList);
-            List<Integer> visibleObjListNoDuplicate = new ArrayList<Integer>();
-            visibleObjListNoDuplicate.add(visibleObjList.get(0));
-            int idx = 0;
-            for(int i = 0; i < visibleObjList.size(); i++) {
-                int tmp = visibleObjList.get(i);
-                if(tmp != visibleObjListNoDuplicate.get(idx)) {
-                    visibleObjListNoDuplicate.add(tmp);
-                    idx += 1;
-                }
-            }
+            List<Integer> visibleObjListNoDuplicate = Tools.removeDuplicateFromList(visibleObjList);
             collector.collect(new Result(dataId, new ArrayList<Integer>(visibleObjListNoDuplicate)));
         }
     }

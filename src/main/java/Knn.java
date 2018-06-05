@@ -135,8 +135,8 @@ public class Knn {
             Position position = primitiveData.getPosition();
             Direction direction = primitiveData.getDirection();
 //            System.out.println("testDataId : " + dataId + " " + position + " " + direction);
-            Set<Integer> visibleObjSet = new HashSet<Integer>();
-            visibleObjSet.clear();
+            List<Integer> visibleObjList = new ArrayList<Integer>();
+            visibleObjList.clear();
             int k = 3;
             List<SimilarityTuple> kNearestNeighbors = Tools.getNearestNeighbors(trainPosition, position, k,
                     1, 15, trainDirection, direction);
@@ -145,9 +145,9 @@ public class Knn {
                 int simId = kNearestNeighbors.get(i).dataId;
 //                System.out.println(dataId + " " + simId + " " + kNearestNeighbors[i].simlarity);
                 Result rs = trainResult.get(simId);
-                visibleObjSet.addAll(rs.getVisibleObj());
+                visibleObjList.addAll(rs.getVisibleObj());
             }
-            collector.collect(new Result(dataId,new ArrayList<Integer>(visibleObjSet)));
+            collector.collect(new Result(dataId,Tools.removeDuplicateFromList(visibleObjList)));
 //            System.out.println("dataId : " + dataId);
         }
     }
