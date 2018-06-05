@@ -35,69 +35,65 @@ public class Tools {
         return sim;
     }
 
-    public static int intersection(List <Integer> list1, List<Integer> list2) {
-        Map<Integer, Integer> map = new HashMap<Integer, Integer>();
-
-        for(int i = 0; i < list1.size(); i++) {
-            map.put(list1.get(i), 1);
-        }
-
-        int jiaoSize = 0;
-        for(int i = 0; i < list2.size(); i++) {
-            if(map.containsKey(list2.get(i))) {
-                jiaoSize += 1;
-            }
-        }
-        return jiaoSize;
-    }
-
-    public static double setSimilarity(List<Integer> set1, List<Integer> set2) {
-        if(set1.size() == 0 && set2.size() == 0) {
+    public static int intersection(List <Integer> sortList1, List<Integer> sortList2) {
+//        Map<Integer, Integer> map = new HashMap<Integer, Integer>();
+//        for(int i = 0; i < list1.size(); i++) {
+//            map.put(list1.get(i), 1);
+//        }
+//        int jiaoSize = 0;
+//        for(int i = 0; i < list2.size(); i++) {
+//            if(map.containsKey(list2.get(i))) {
+//                jiaoSize += 1;
+//            }
+//        }
+        int size1 = sortList1.size();
+        int size2 = sortList2.size();
+        if(size1 == 0 && size2 == 0) {
             return 0;
         }
         int jiaoSize = 0;
-        int bingSize = 0;
         int i = 0;
         int j = 0;
-        while(i < set1.size() && j < set2.size()) {
-            bingSize += 1;
-            if(set1.get(i).equals(set2.get(j))) {
+        while(i < size1 && j < size2) {
+            if(sortList1.get(i).equals(sortList2.get(j))) {
                 jiaoSize += 1;
                 i += 1;
                 j += 1;
             } else {
-                if(set1.get(i) < set2.get(j)) {
+                if(sortList1.get(i) < sortList2.get(j)) {
                     i += 1;
                 } else {
                     j += 1;
                 }
             }
         }
-        if(i < set1.size()) {
-            bingSize += set1.size() - i;
+        return jiaoSize;
+    }
+
+    public static double setSimilarity(List<Integer> sortList1, List<Integer> sortList2) {
+        int size1 = sortList1.size();
+        int size2 = sortList2.size();
+        if(size1 == 0 && size2 == 0) {
+            return 0;
         }
-        if(j < set2.size()) {
-            bingSize += set2.size() - j;
+        int jiaoSize = 0;
+        int i = 0;
+        int j = 0;
+        while(i < size1 && j < size2) {
+            if(sortList1.get(i).equals(sortList2.get(j))) {
+                jiaoSize += 1;
+                i += 1;
+                j += 1;
+            } else {
+                if(sortList1.get(i) < sortList2.get(j)) {
+                    i += 1;
+                } else {
+                    j += 1;
+                }
+            }
         }
-//        System.out.println("jiao : " + jiaoSize + " bing: " + bingSize + " res: " + jiaoSize*1.0 / bingSize);
+        int bingSize = size1 + size2 - jiaoSize;
         return jiaoSize*1.0 / bingSize;
-//        Map<Integer, Integer> map = new HashMap<Integer, Integer>();
-//        Iterator iterator = set1.iterator();
-//        while(iterator.hasNext()) {
-//            int tmp = (Integer) iterator.next();
-//            map.put(tmp, 1);
-//            bingSize += 1;
-//        }
-//        iterator = set2.iterator();
-//        while(iterator.hasNext()) {
-//            int tmp = (Integer) iterator.next();
-//            if(map.containsKey(tmp)) {
-//                jiaoSize += 1;
-//            } else {
-//                bingSize += 1;
-//            }
-//        }
-//        return jiaoSize*1.0 / bingSize;
     }
 
     public static List<SimilarityTuple> listSort(List<SimilarityTuple> list) {
@@ -132,7 +128,7 @@ public class Tools {
                 if(minHeap.getCount() == kk) {
                     minHeap.buildHeap();
                 }
-            } else {
+            } else if(minHeap.getCount() > kk){
                 if(sim > minHeap.arr[0].similarityP) {
                     minHeap.arr[0] = new SimilarityTuple(dataId, sim);
                     minHeap.adjustHeap(0);
@@ -204,7 +200,7 @@ public class Tools {
         for(Map.Entry<Integer, Result> entry : trainResult.entrySet()) {
             int dataId = entry.getKey();
             List<Integer> visibleObj = entry.getValue().getVisibleObj();
-            // 耗时的重点所在：计算两个较大集合的相似度
+            // 耗时的重点所在：计算两个较大集合的相似度,使用两个排序的list求交集能够提高效率
             double sim = Tools.setSimilarity(predictVisibleObj, visibleObj);
             //当只有一个sim时调用第一个构造函数，虽然是similarityP，这里也可认为是结果集合的相似性
             if(minHeap.getCount() < howMany) {
@@ -212,7 +208,7 @@ public class Tools {
                 if(minHeap.getCount() == howMany) {
                     minHeap.buildHeap();
                 }
-            } else {
+            } else if(minHeap.getCount() > howMany){
                 if(sim > minHeap.arr[0].similarityP) {
                     minHeap.arr[0] = new SimilarityTuple(dataId, sim);
                     minHeap.adjustHeap(0);

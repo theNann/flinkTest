@@ -67,19 +67,16 @@ public class CollaborativeFiltering {
             Direction direction = primitiveData.getDirection();
             List<SimilarityTuple> coldStartNearestNeighbor = Tools.getNearestNeighbors(trainPosition, position, 1,
                     1, 15, trainDirection, direction);
-            Set<Integer> visibleObjSet = new HashSet<Integer>(); //看改成list能不能加快，最后单独去重
-            visibleObjSet.clear();
+            List<Integer> visibleObjList = new ArrayList<Integer>();
+            visibleObjList.clear();
             int coldStartDataId = coldStartNearestNeighbor.get(0).dataId;
             for(int i = 0; i < coldStartNearestNeighbor.size(); i++) {
                 int simId = coldStartNearestNeighbor.get(i).dataId;
                 Result rs = trainResult.get(simId);
-                visibleObjSet.addAll(rs.getVisibleObj());
+                visibleObjList.addAll(rs.getVisibleObj());
             }
-            List<Integer> visibleObjList = new ArrayList<Integer>(visibleObjSet);
             Collections.sort(visibleObjList);
             int howMany = 4;
-//            List<SimilarityTuple> recommendNearestNeighbors = Tools.getNearestNeighbors(trainPosition, position, 3,
-//                    1, 15, trainDirection, direction);
             List<SimilarityTuple> recommendNearestNeighbors = Tools.userBasedRecommend(trainResult, visibleObjList, howMany);
             for(int i = 0; i < recommendNearestNeighbors.size(); i++) {
                 int simId = recommendNearestNeighbors.get(i).dataId;
@@ -87,9 +84,21 @@ public class CollaborativeFiltering {
                     continue;
                 }
                 Result rs = trainResult.get(simId);
-                visibleObjSet.addAll(rs.getVisibleObj());
+                visibleObjList.addAll(rs.getVisibleObj());
             }
-            collector.collect(new Result(dataId, new ArrayList<Integer>(visibleObjSet)));
+            //去重
+            Collections.sort(visibleObjList);
+            List<Integer> visibleObjListNoDuplicate = new ArrayList<Integer>();
+            visibleObjListNoDuplicate.add(visibleObjList.get(0));
+            int idx = 0;
+            for(int i = 0; i < visibleObjList.size(); i++) {
+                int tmp = visibleObjList.get(i);
+                if(tmp != visibleObjListNoDuplicate.get(idx)) {
+                    visibleObjListNoDuplicate.add(tmp);
+                    idx += 1;
+                }
+            }
+            collector.collect(new Result(dataId, new ArrayList<Integer>(visibleObjListNoDuplicate)));
         }
     }
 }

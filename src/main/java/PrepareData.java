@@ -25,7 +25,8 @@ import java.util.List;
 //TODO 1）KNN和推荐时可用小顶堆维护求TopK问题(尚无明显效果，当前训练集数目不多，排序也挺快) 2）集合运算优化，使用Hashmap求交并 3)用List代替Set存储结果集，大大提高了效率
 //TODO 实现OcclusionCulling与FLink的socket帧数据的通信（已完成）
 //TODO 给每帧数据编号，Flink这边能按编号顺序发送结果，並且能在OcclusionCulling中顯示（已完成，使用writeToSocket API）
-//TODO 增加更多的训练和测试数据，着重提高recall,  修改求集合的相似度，利用AUB = A+B-AnB计算试试,同时看getNearestNeighbor有没有可改进的
+//TODO 增加更多的训练和测试数据，着重提高recall,
+//TODO 修改求集合的相似度，利用AUB = A+B-AnB计算试试(提高了),同时看getNearestNeighbor有没有可改进的(无改进)
 @SuppressWarnings("serial")
 public class PrepareData {
     private ExecutionEnvironment env;
