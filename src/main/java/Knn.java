@@ -84,7 +84,7 @@ public class Knn {
 //        }
     }
 
-    public void solveKnn() {
+    public DataSet<Tuple3<Integer, Double, Double>> solveKnn() {
         DataSet<Result> ans = testDataDS.flatMap(new knnMap());
 //        if (params.has("output")) {
 //            System.out.println("output : " + params.get("output"));
@@ -106,14 +106,18 @@ public class Knn {
 //        System.out.println("testTarget size : " + testTarget.size());
 //        HashMap<Integer, PrimitiveData> testData = prepareData.getTestData();
 //        System.out.println("testData size : " + testData.size());
-//        Tools.expandTrainSet(scores, testData, testResult, 11551);
+//        Tools.expandTrainSet(scores, testData, testResult, 13674);
 
         scores.writeAsCsv(writoTofile,"\n",",", FileSystem.WriteMode.OVERWRITE)
                 .setParallelism(1);
 
         try {
             env.execute("FlinkScores");
-        } catch (Exception e) {}
+        } catch (Exception e) {
+
+        }finally {
+            return scores;
+        }
     }
 
     public static final class scoreMap implements FlatMapFunction<Result, Tuple3<Integer,Double, Double>> {
@@ -137,9 +141,10 @@ public class Knn {
 //            System.out.println("testDataId : " + dataId + " " + position + " " + direction);
             List<Integer> visibleObjList = new ArrayList<Integer>();
             visibleObjList.clear();
-            int k = 3;
-            List<SimilarityTuple> kNearestNeighbors = Tools.getNearestNeighbors(trainPosition, position, k,
-                    1, 15, trainDirection, direction);
+            int positionK = Configuration.getInstance().getKnnPositionk();
+            int directionK = Configuration.getInstance().getKnnDirectionk();
+            List<SimilarityTuple> kNearestNeighbors = Tools.getNearestNeighbors(trainPosition, position, directionK,
+                    1, positionK, trainDirection, direction);
 
             for(int i = 0; i < kNearestNeighbors.size(); i++) {
                 int simId = kNearestNeighbors.get(i).dataId;
@@ -148,7 +153,7 @@ public class Knn {
                 visibleObjList.addAll(rs.getVisibleObj());
             }
             collector.collect(new Result(dataId,Tools.removeDuplicateFromList(visibleObjList)));
-//            System.out.println("dataId : " + dataId);
+            System.out.println("dataId : " + dataId);
         }
     }
 

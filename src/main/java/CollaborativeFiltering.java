@@ -37,14 +37,18 @@ public class CollaborativeFiltering {
         testResult = prepareResult.getTestResult();
     }
 
-    public void solveCollaborativeFiltering() {
+    public DataSet<Tuple3<Integer, Double, Double>> solveCollaborativeFiltering() {
         DataSet<Result> ans = testDataDS.flatMap(new recommenderMap());
         DataSet<Tuple3<Integer, Double, Double>> scores = ans.flatMap(new scoreMap());
         scores.writeAsCsv(writoTofile,"\n",",", FileSystem.WriteMode.OVERWRITE)
                 .setParallelism(1);
         try {
             env.execute("FlinkScores");
-        } catch (Exception e) {}
+        } catch (Exception e) {
+
+        } finally {
+            return scores;
+        }
     }
 
     public static final class scoreMap implements FlatMapFunction<Result, Tuple3<Integer,Double, Double>> {
@@ -76,7 +80,7 @@ public class CollaborativeFiltering {
                 visibleObjList.addAll(rs.getVisibleObj());
             }
             Collections.sort(visibleObjList);
-            int howMany = 2;
+            int howMany = Configuration.getInstance().getCFHowMany();
             List<SimilarityTuple> recommendNearestNeighbors = Tools.userBasedRecommend(trainResult, visibleObjList, howMany);
             for(int i = 0; i < recommendNearestNeighbors.size(); i++) {
                 int simId = recommendNearestNeighbors.get(i).dataId;

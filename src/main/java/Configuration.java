@@ -6,6 +6,11 @@ public class Configuration {
     private String testDataPath;
     private String trainTargetPath;
     private String testTargetPath;
+    private int knnPositionk;
+    private int knnDirectionk;
+    private int CFHowMany;
+    private int Reck;
+    private int RecHowMany;
     private static Configuration instance = null;
 
     private Configuration() {
@@ -75,5 +80,45 @@ public class Configuration {
 
     public void setTestTargetPath(String testTargetPath) {
         this.testTargetPath = testTargetPath;
+    }
+
+    public int getKnnPositionk() {
+        return knnPositionk;
+    }
+
+    public void setKnnPositionk(int knnPositionk) {
+        this.knnPositionk = knnPositionk;
+    }
+
+    public int getKnnDirectionk() {
+        return knnDirectionk;
+    }
+
+    public void setKnnDirectionk(int knnDirectionk) {
+        this.knnDirectionk = knnDirectionk;
+    }
+
+    public int getCFHowMany() {
+        return CFHowMany;
+    }
+
+    public void setCFHowMany(int CFHowMany) {
+        this.CFHowMany = CFHowMany;
+    }
+
+    public int getReck() {
+        return Reck;
+    }
+
+    public void setReck(int reck) {
+        Reck = reck;
+    }
+
+    public int getRecHowMany() {
+        return RecHowMany;
+    }
+
+    public void setRecHowMany(int recHowMany) {
+        RecHowMany = recHowMany;
     }
 }

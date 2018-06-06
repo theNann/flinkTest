@@ -235,7 +235,7 @@ public class Tools {
         try {
             List<Tuple3<Integer, Double, Double>> list = scores.collect();
             for(int i = 0; i < list.size(); i++) {
-                if(list.get(i).f1 < 0.5 || list.get(i).f2 < 0.5) {
+                if(list.get(i).f1 < 0.8 || list.get(i).f2 < 0.8) {
                     int dataId = list.get(i).f0;
                     expandData.add(testData.get(dataId));
                     expandResult.add(testResult.get(dataId));
@@ -364,5 +364,23 @@ public class Tools {
             }
         }
         return listNoDuplicate;
+    }
+
+    public static Tuple3<Integer, Double, Double> calScoresAvg(DataSet<Tuple3<Integer, Double, Double>> scores) {
+        double accSum = 0;
+        double recallSum = 0;
+        int len = 1;
+        try {
+            List<Tuple3<Integer, Double, Double>> scoresList = scores.collect();
+            len = scoresList.size();
+            for(int i = 0; i < len; i++) {
+                accSum += scoresList.get(i).f1;
+                recallSum += scoresList.get(i).f2;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return new Tuple3<Integer, Double, Double>(Configuration.getInstance().getCFHowMany(), accSum/len,
+                recallSum/len);
     }
 }

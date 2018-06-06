@@ -48,8 +48,8 @@ public class Recommender {
 
     public static final class recommenderMap implements FlatMapFunction<PrimitiveData, Result> {
         public void flatMap(PrimitiveData primitiveData, Collector<Result> collector) throws Exception {
-            int k = 2;
-            int howMany = 2;
+            int k = Configuration.getInstance().getReck();
+            int howMany = Configuration.getInstance().getRecHowMany();
             int maxK = 15;
             int dataId = primitiveData.getDataId();
             Position position = primitiveData.getPosition();
