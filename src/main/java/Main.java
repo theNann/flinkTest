@@ -81,8 +81,8 @@ public class Main {
         {
             //Configuration.getInstance().setKnnDirectionk(k);
             DataSet<Tuple3<Integer, Double, Double>> scores = knn.solveKnn();
-            Tuple3<Integer, Double, Double> avg = Tools.calScoresAvg(scores);
-            avgs.add(avg);
+//            Tuple3<Integer, Double, Double> avg = Tools.calScoresAvg(scores);
+//            avgs.add(avg);
         }
 
         for(int i = 0; i < avgs.size(); i++) {
@@ -94,7 +94,7 @@ public class Main {
         System.out.println("Cal time: " + (endTime-prepareTime)*1.0/1000 + "s ,Data size: " + prepareData.getTestData().size());
         System.out.println("train: data, result " + prepareData.getTrainPosition().size()+" "+prepareResult.getTrainResult().size()); //11550
         System.out.println("test: data, result " + prepareData.getTestData().size()+ " " + prepareResult.getTestResult().size()); // 4852
-
+        System.out.println("grid : " + prepareData.getTrainData()[0].length + " " + prepareData.getTrainData()[0][0].length);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         //與c++交互

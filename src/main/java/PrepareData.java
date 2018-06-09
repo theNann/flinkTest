@@ -41,6 +41,7 @@ public class PrepareData {
         this.testFilePath = testFilePath;
         trainPosition = new HashMap<Integer, Position>();
         trainDirection = new HashMap<Integer, Direction>();
+        trainMapData = new HashMap<Integer, PrimitiveData>();
         testData = new HashMap<Integer, PrimitiveData>();
         trainData = new GridData[SceneInfo.xGridNumber][SceneInfo.yGridNumber][SceneInfo.zGridNumber];
         for (int i = 0; i < SceneInfo.xGridNumber; i++) {
@@ -54,15 +55,6 @@ public class PrepareData {
         readTrainDirection();
         readTrainMapData();
         readTestData();
-        getTrainData();
-    }
-
-    public void getTrainData() {
-        for (int i = 0; i < trainPosition.size(); i++) {
-            Position position = trainPosition.get(i);
-            Direction direction = trainDirection.get(i);
-            int x = position.getPx()
-        }
     }
 
     public static PrepareData getInstance(ExecutionEnvironment env, String trainFilePath, String testFilePath) {
@@ -186,4 +178,11 @@ public class PrepareData {
         return testData;
     }
 
+    public HashMap<Integer, PrimitiveData> getTrainMapData() {
+        return trainMapData;
+    }
+
+    public GridData[][][] getTrainData() {
+        return trainData;
+    }
 }

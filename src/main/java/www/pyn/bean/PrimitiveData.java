@@ -63,18 +63,6 @@ public class PrimitiveData implements Serializable {
         return dz;
     }
 
-    public double getx() {
-        return (dx + 40) / ;
-    }
-
-    public double gety() {
-        return dy;
-    }
-
-    public double getz() {
-        return dz;
-    }
-
     public void setDataId(int dataId) {
         this.dataId = dataId;
     }

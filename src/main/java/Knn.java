@@ -15,7 +15,6 @@ import org.apache.flink.util.Collector;
 import org.omg.CORBA.Environment;
 import scala.concurrent.Promise;
 import www.pyn.bean.*;
-
 import java.util.*;
 
 @SuppressWarnings("serial")
@@ -23,6 +22,7 @@ import java.util.*;
 public class Knn {
     private static HashMap<Integer, Position> trainPosition;
     private static HashMap<Integer, Direction> trainDirection;
+    private static GridData[][][] trainData;
     private DataSet<PrimitiveData> testDataDS;
     private HashMap<Integer, PrimitiveData> testData;
 
@@ -41,47 +41,12 @@ public class Knn {
 
         trainPosition = prepareData.getTrainPosition();
         trainDirection = prepareData.getTrainDirection();
+        trainData = prepareData.getTrainData();
         testDataDS = prepareData.getTestDataDS();
         testData = prepareData.getTestData();
 
         trainResult = prepareResult.getTrainResult();
         testResult = prepareResult.getTestResult();
-    }
-
-    public void test() {
-        System.out.println("train " + trainPosition.size() + " " + trainDirection.size() + " " + trainResult.size());
-        System.out.println("test " + testResult.size());
-//        for(Map.Entry<Integer,Direction> entry : trainDirection.entrySet()) {
-//            System.out.println(entry.getKey() + " " + entry.getValue());
-//        }
-
-//        List<Position> train = new ArrayList<Position>();
-//
-//        train.add(new Position(0, 0, 0, 1));
-//        train.add(new Position(1, 0, 1, 0));
-//        train.add(new Position(2, 1, 0, 0));
-//        train.add(new Position(3, 1, 1, 1));
-//
-//        Position p = new Position(0, 0, 0, 1);
-//        SimilarityTuple[] nearestNeighbor = Tools.getNearestNeighbors(train, 3, p);
-//        for(int i = 0; i < nearestNeighbor.length; i++) {
-//            System.out.println(nearestNeighbor[i].dataId + " " + nearestNeighbor[i].simlarity);
-//        }
-//        System.out.println("testResult_size: " + testResult.size());
-//        Result rs = testResult.get(0);
-//        for(int i = 0; i < rs.getVisibleObj().size(); i++) {
-//            System.out.println(rs.getVisibleObj().);
-//        }
-//        System.out.println("trainResult_size: " + trainResult.size());
-//        System.out.println("dataId : " + testResult.get(0).getDataId());
-//        for(int i = 0; i < testResult.get(0).getVisibleObj().size(); i++) {
-//            System.out.println(testResult.get(0).getVisibleObj().get(i) + " ");
-//        }
-//        System.out.println("trainPosition_size: " + trainPosition.size());
-//        System.out.println("trainDirection_size: " + trainDirection.size());
-//        for(int i = 0; i < trainDirection.size(); i++) {
-//            System.out.println(trainDirection.get(i) + "//////////////////////");
-//        }
     }
 
     public DataSet<Tuple3<Integer, Double, Double>> solveKnn() {
@@ -141,17 +106,32 @@ public class Knn {
 //            System.out.println("testDataId : " + dataId + " " + position + " " + direction);
             List<Integer> visibleObjList = new ArrayList<Integer>();
             visibleObjList.clear();
-            int positionK = Configuration.getInstance().getKnnPositionk();
-            int directionK = Configuration.getInstance().getKnnDirectionk();
-            List<SimilarityTuple> kNearestNeighbors = Tools.getNearestNeighbors(trainPosition, position, directionK,
-                    1, positionK, trainDirection, direction);
-
-            for(int i = 0; i < kNearestNeighbors.size(); i++) {
-                int simId = kNearestNeighbors.get(i).dataId;
-//                System.out.println(dataId + " " + simId + " " + kNearestNeighbors[i].simlarity);
-                Result rs = trainResult.get(simId);
-                visibleObjList.addAll(rs.getVisibleObj());
+//            int positionK = Configuration.getInstance().getKnnPositionk();
+//            int directionK = Configuration.getInstance().getKnnDirectionk();
+//            List<SimilarityTuple> kNearestNeighbors = Tools.getNearestNeighbors(trainPosition, position, directionK,
+//                    1, positionK, trainDirection, direction);
+//
+//            for(int i = 0; i < kNearestNeighbors.size(); i++) {
+//                int simId = kNearestNeighbors.get(i).dataId;
+////                System.out.println(dataId + " " + simId + " " + kNearestNeighbors[i].simlarity);
+//                Result rs = trainResult.get(simId);
+//                visibleObjList.addAll(rs.getVisibleObj());
+//            }
+            int gridX = SceneInfo.ToGridX(position.getPx());
+            int gridY = SceneInfo.ToGridY(position.getPy());
+            int gridZ = SceneInfo.ToGridZ(position.getPz());
+            GridData gridData = trainData[gridX][gridY][gridZ];
+            int idx = -1;
+            double maxSim = -1;
+            for(int i = 0; i < gridData.primitives.size(); i++) {
+                double[] d = gridData.primitives.get(i).getDirection().getDirection();
+                double sim = Tools.vectorSimlarity(d, direction.getDirection());
+                if(sim > maxSim) {
+                    maxSim = sim;
+                    idx = i;
+                }
             }
+            visibleObjList.addAll(trainResult.get(gridData.primitives.get(idx).getDataId()).getVisibleObj());
             collector.collect(new Result(dataId,Tools.removeDuplicateFromList(visibleObjList)));
             System.out.println("dataId : " + dataId);
         }
