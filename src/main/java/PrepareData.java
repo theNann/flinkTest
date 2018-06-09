@@ -7,10 +7,7 @@ import org.apache.flink.api.common.functions.FlatMapFunction;
 import org.apache.flink.api.java.DataSet;
 import org.apache.flink.api.java.ExecutionEnvironment;
 import org.apache.flink.util.Collector;
-import www.pyn.bean.Direction;
-import www.pyn.bean.Position;
-import www.pyn.bean.PrimitiveData;
-import www.pyn.bean.Result;
+import www.pyn.bean.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -32,6 +29,7 @@ public class PrepareData {
     private ExecutionEnvironment env;
     private HashMap<Integer, Position> trainPosition;
     private HashMap<Integer, Direction> trainDirection;
+    private GridData[][][] trainData;
     private DataSet<PrimitiveData> testDataDS;
     private HashMap<Integer, PrimitiveData> testData;
     private String trainFilePath;
@@ -44,9 +42,25 @@ public class PrepareData {
         trainPosition = new HashMap<Integer, Position>();
         trainDirection = new HashMap<Integer, Direction>();
         testData = new HashMap<Integer, PrimitiveData>();
+        trainData = new GridData[SceneInfo.xGridNumber][SceneInfo.yGridNumber][SceneInfo.zGridNumber];
+        for(int i = 0; i < SceneInfo.xGridNumber; i++) {
+            for(int j = 0; j < SceneInfo.yGridNumber; j++) {
+                for(int k = 0; k < SceneInfo.zGridNumber; k++) {
+                    trainData[i][j][k] = new GridData();
+                }
+            }
+        }
         readTrainPosition();
         readTrainDirection();
         readTestData();
+        getTrainData();
+    }
+    public void getTrainData() {
+        for(int i = 0; i < trainPosition.size(); i++) {
+            Position position = trainPosition.get(i);
+            Direction direction = trainDirection.get(i);
+            int x = position.getPx()
+        }
     }
 
     public static PrepareData getInstance(ExecutionEnvironment env, String trainFilePath, String testFilePath) {

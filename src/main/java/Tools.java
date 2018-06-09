@@ -1,8 +1,3 @@
-import com.opencsv.CSVWriter;
-import com.opencsv.bean.StatefulBeanToCsv;
-import com.opencsv.bean.StatefulBeanToCsvBuilder;
-import com.opencsv.exceptions.CsvDataTypeMismatchException;
-import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
 import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.flink.api.java.DataSet;
 import org.apache.flink.api.java.tuple.Tuple3;
@@ -373,14 +368,14 @@ public class Tools {
         try {
             List<Tuple3<Integer, Double, Double>> scoresList = scores.collect();
             len = scoresList.size();
-            for(int i = 0; i < len; i++) {
+            for (int i = 0; i < len; i++) {
                 accSum += scoresList.get(i).f1;
                 recallSum += scoresList.get(i).f2;
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return new Tuple3<Integer, Double, Double>(Configuration.getInstance().getCFHowMany(), accSum/len,
-                recallSum/len);
+        return new Tuple3<Integer, Double, Double>(Configuration.getInstance().getKnnDirectionk(), accSum / len,
+                recallSum / len);
     }
 }

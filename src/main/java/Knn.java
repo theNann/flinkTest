@@ -32,7 +32,7 @@ public class Knn {
 
     private ExecutionEnvironment env;
     private ParameterTool params;
-    private String writoTofile = "/home/pyn/Desktop/DataSet/knnScore.csv";
+    private String writoTofile = "E:\\DataSet\\knnScore.csv";
 
     public Knn(ParameterTool params, ExecutionEnvironment env, PrepareData prepareData,
                PrepareResult prepareResult) {
