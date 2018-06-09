@@ -1,8 +1,11 @@
 package www.pyn.bean;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created by pyn on 2018/6/10.
  */
 public class GridData {
-    public PrimitiveData[] primitives = new PrimitiveData[24];
+    public List<PrimitiveData> primitives = new ArrayList<PrimitiveData>();
 }

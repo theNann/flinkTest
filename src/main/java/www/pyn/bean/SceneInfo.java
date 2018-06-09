@@ -14,4 +14,13 @@ public class SceneInfo {
     public static int xGridNumber = (int) Math.ceil((positionXmax - positionXmin) / gridLength);
     public static int yGridNumber = (int) Math.ceil((positionYmax - positionYmin) / gridLength);
     public static int zGridNumber = (int) Math.ceil((positionZmax - positionZmin) / gridLength);
+    public static int ToGridX(double x) {
+        return (int)Math.floor((x + 40) / gridLength);
+    }
+    public static int ToGridY(double y) {
+        return (int)Math.floor(y / gridLength);
+    }
+    public static int ToGridZ(double z) {
+        return (int)Math.floor((z + 70) / gridLength);
+    }
 }

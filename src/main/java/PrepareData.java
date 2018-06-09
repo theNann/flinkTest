@@ -9,9 +9,7 @@ import org.apache.flink.api.java.ExecutionEnvironment;
 import org.apache.flink.util.Collector;
 import www.pyn.bean.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 //TODO 添加direction，测试输入数据的正确性（训练集和测试集）(已完成)
 //TODO 从target.txt文件中读取训练集和测试集的结果，建议新建一个类PrepareResult来操作（已完成）
@@ -29,34 +27,38 @@ public class PrepareData {
     private ExecutionEnvironment env;
     private HashMap<Integer, Position> trainPosition;
     private HashMap<Integer, Direction> trainDirection;
+    private HashMap<Integer, PrimitiveData> trainMapData;
     private GridData[][][] trainData;
     private DataSet<PrimitiveData> testDataDS;
     private HashMap<Integer, PrimitiveData> testData;
     private String trainFilePath;
     private String testFilePath;
     private static PrepareData prepareData = null;
+
     private PrepareData(ExecutionEnvironment env, String trainFilePath, String testFilePath) {
-        this.env  = env;
+        this.env = env;
         this.trainFilePath = trainFilePath;
         this.testFilePath = testFilePath;
         trainPosition = new HashMap<Integer, Position>();
         trainDirection = new HashMap<Integer, Direction>();
         testData = new HashMap<Integer, PrimitiveData>();
         trainData = new GridData[SceneInfo.xGridNumber][SceneInfo.yGridNumber][SceneInfo.zGridNumber];
-        for(int i = 0; i < SceneInfo.xGridNumber; i++) {
-            for(int j = 0; j < SceneInfo.yGridNumber; j++) {
-                for(int k = 0; k < SceneInfo.zGridNumber; k++) {
+        for (int i = 0; i < SceneInfo.xGridNumber; i++) {
+            for (int j = 0; j < SceneInfo.yGridNumber; j++) {
+                for (int k = 0; k < SceneInfo.zGridNumber; k++) {
                     trainData[i][j][k] = new GridData();
                 }
             }
         }
         readTrainPosition();
         readTrainDirection();
+        readTrainMapData();
         readTestData();
         getTrainData();
     }
+
     public void getTrainData() {
-        for(int i = 0; i < trainPosition.size(); i++) {
+        for (int i = 0; i < trainPosition.size(); i++) {
             Position position = trainPosition.get(i);
             Direction direction = trainDirection.get(i);
             int x = position.getPx()
@@ -64,7 +66,7 @@ public class PrepareData {
     }
 
     public static PrepareData getInstance(ExecutionEnvironment env, String trainFilePath, String testFilePath) {
-        if(prepareData == null) {
+        if (prepareData == null) {
             prepareData = new PrepareData(env, trainFilePath, testFilePath);
         } else {
             return prepareData;
@@ -80,7 +82,7 @@ public class PrepareData {
         try {
             List<Position> list = trainPositionDataSet.collect();
             trainPosition.clear();
-            for(int i = 0; i < list.size(); i++) {
+            for (int i = 0; i < list.size(); i++) {
                 int dataId = list.get(i).getDataId();
                 Position position = list.get(i);
                 trainPosition.put(dataId, position);
@@ -98,12 +100,33 @@ public class PrepareData {
         try {
             List<Direction> list = trainDirectionDataSet.collect();
             trainDirection.clear();
-            for(int i = 0; i < list.size(); i++) {
+            for (int i = 0; i < list.size(); i++) {
                 int dataId = list.get(i).getDataId();
                 trainDirection.put(dataId, list.get(i));
             }
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    private void readTrainMapData() {
+        DataSet<PrimitiveData> trainMapDataSet = env.readCsvFile(trainFilePath)
+                .includeFields("1111111000")
+                .pojoType(PrimitiveData.class, "dataId", "px", "py", "pz", "dx", "dy", "dz");
+        try {
+            List<PrimitiveData> list = trainMapDataSet.collect();
+            trainMapData.clear();
+            for (int i = 0; i < list.size(); i++) {
+                int dataId = list.get(i).getDataId();
+                trainMapData.put(dataId, list.get(i));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        for (Map.Entry<Integer, PrimitiveData> entry : trainMapData.entrySet()) {
+            trainData[SceneInfo.ToGridX(entry.getValue().px)]
+                    [SceneInfo.ToGridY(entry.getValue().py)]
+                    [SceneInfo.ToGridZ(entry.getValue().pz)].primitives.add(entry.getValue());
         }
     }
 
@@ -117,7 +140,7 @@ public class PrepareData {
             List<PrimitiveData> list = testDataDS.collect();
             System.out.println("tesetData Collect!!!!!!!!!!!!!!!!!!!!!!!!!");
             testData.clear();
-            for(int i = 0; i < list.size(); i++) {
+            for (int i = 0; i < list.size(); i++) {
                 int dataId = list.get(i).getDataId();
                 testData.put(dataId, list.get(i));
             }
