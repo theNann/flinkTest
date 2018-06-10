@@ -1,6 +1,4 @@
-import org.apache.commons.math3.analysis.function.Min;
 import org.apache.flink.api.common.functions.FlatMapFunction;
-import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.serialization.SerializationSchema;
 import org.apache.flink.api.java.DataSet;
 import org.apache.flink.api.java.ExecutionEnvironment;
@@ -8,19 +6,14 @@ import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.streaming.api.functions.source.SocketTextStreamFunction;
 import org.apache.flink.util.Collector;
-import org.ujmp.core.DenseMatrix;
-import org.ujmp.core.Matrix;
-import www.pyn.bean.*;
+import www.pyn.bean.PrimitiveData;
+import www.pyn.bean.Result;
+import www.pyn.tools.Configuration;
+import www.pyn.tools.Tools;
 
-import java.io.*;
-import java.net.InetSocketAddress;
-import java.net.Socket;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 
 public class Main {
@@ -66,9 +59,9 @@ public class Main {
 
         Configuration.getInstance().setKnnPositionk(48);
         Configuration.getInstance().setKnnDirectionk(2);
-//        Configuration.getInstance().setReck(2);
-//        Configuration.getInstance().setRecHowMany(3);
-//        Configuration.getInstance().setCFHowMany(4);
+//        www.pyn.tools.Tools.Configuration.getInstance().setReck(2);
+//        www.pyn.tools.Tools.Configuration.getInstance().setRecHowMany(3);
+//        www.pyn.tools.Tools.Configuration.getInstance().setCFHowMany(4);
         Knn knn = new Knn(params, env, prepareData, prepareResult);
 //        Recommender recommender = new Recommender(params, env, prepareData, prepareResult);
 //        CollaborativeFiltering collaborativeFiltering = new CollaborativeFiltering(params, env, prepareData, prepareResult);
@@ -79,9 +72,9 @@ public class Main {
 //        recommender.solveRecommender();
         //for(int k = 2; k <= 7; k += 1)
         {
-            //Configuration.getInstance().setKnnDirectionk(k);
-            DataSet<Tuple3<Integer, Double, Double>> scores = knn.solveKnn();
-//            Tuple3<Integer, Double, Double> avg = Tools.calScoresAvg(scores);
+            //www.pyn.tools.Tools.Configuration.getInstance().setKnnDirectionk(k);
+//            DataSet<Tuple3<Integer, Double, Double>> scores = knn.solveKnn();
+//            Tuple3<Integer, Double, Double> avg = www.pyn.tools.Tools.calScoresAvg(scores);
 //            avgs.add(avg);
         }
 
@@ -98,60 +91,60 @@ public class Main {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         //與c++交互
-//        StreamExecutionEnvironment senv = StreamExecutionEnvironment.getExecutionEnvironment();
-//        String ip = Configuration.getInstance().getIp();
-//        int readPort = Configuration.getInstance().getReadPort();
-//        int writePort = Configuration.getInstance().getWritePort();
-//        DataStream<byte[]> bytes = senv.addSource(new SocketByteStreamFunction(ip, readPort, 18*4,0L));
-//
-//        DataStream<PrimitiveData> primitiveDataDataStream = bytes.flatMap(new FlatMapFunction<byte[], PrimitiveData>() {
-//            public void flatMap(byte[] bytes, Collector<PrimitiveData> collector) throws Exception {
-//                PrimitiveData primitiveData = PrimitiveData.primitiveDataFromBytes(bytes);
-//                collector.collect(primitiveData);
-//            }
-//        });
-//
-//        DataStream<Result> result = primitiveDataDataStream.flatMap(new Knn.knnMap());
-//
-//        result.writeToSocket(ip, writePort, new SerializationSchema<Result>() {
-//            public byte[] serialize(Result re) {
-//                int len = re.getVisibleObj().size()+1;
-//                System.out.println("len : " + len);
-//                byte[] buffer = new byte[(len+1)*4];
-//                generaterBuffer(buffer, 0, len);
-//                generaterBuffer(buffer, 1, re.getDataId());
-//                for(int i = 0; i < re.getVisibleObj().size(); i++) {
-//                    int tmp = re.getVisibleObj().get(i);
-//                    generaterBuffer(buffer, i+2, tmp);
+        StreamExecutionEnvironment senv = StreamExecutionEnvironment.getExecutionEnvironment();
+        String ip = Configuration.getInstance().getIp();
+        int readPort = Configuration.getInstance().getReadPort();
+        int writePort = Configuration.getInstance().getWritePort();
+        DataStream<byte[]> bytes = senv.addSource(new SocketByteStreamFunction(ip, readPort, 18*4,0L));
+
+        DataStream<PrimitiveData> primitiveDataDataStream = bytes.flatMap(new FlatMapFunction<byte[], PrimitiveData>() {
+            public void flatMap(byte[] bytes, Collector<PrimitiveData> collector) throws Exception {
+                PrimitiveData primitiveData = PrimitiveData.primitiveDataFromBytes(bytes);
+                collector.collect(primitiveData);
+            }
+        });
+
+        DataStream<Result> result = primitiveDataDataStream.flatMap(new Knn.knnMap());
+
+        result.writeToSocket(ip, writePort, new SerializationSchema<Result>() {
+            public byte[] serialize(Result re) {
+                int len = re.getVisibleObj().size()+1;
+                System.out.println("len : " + len);
+                byte[] buffer = new byte[(len+1)*4];
+                generaterBuffer(buffer, 0, len);
+                generaterBuffer(buffer, 1, re.getDataId());
+                for(int i = 0; i < re.getVisibleObj().size(); i++) {
+                    int tmp = re.getVisibleObj().get(i);
+                    generaterBuffer(buffer, i+2, tmp);
+                }
+//                File file = new File("/home/pyn/Desktop/out.txt");
+//                FileOutputStream in;
+//                try {
+//                    in = new FileOutputStream(file);
+//                    String start = "start ";
+//                    in.write(start.getBytes());
+//                    for(int i = 0; i < re.getVisibleObj().size(); i++) {
+//                        int tmp = re.getVisibleObj().get(i);
+//                        byte[] bt = String.valueOf(tmp).concat(", ").getBytes();
+//                        in.write(bt, 0 ,bt.length);
+//                        generaterBuffer(buffer, i+2, tmp);
+//                    }
+//                    in.close();
+//                } catch (FileNotFoundException e) {
+//                    e.printStackTrace();
+//                } catch (IOException e) {
+//                    e.printStackTrace();
 //                }
-////                File file = new File("/home/pyn/Desktop/out.txt");
-////                FileOutputStream in;
-////                try {
-////                    in = new FileOutputStream(file);
-////                    String start = "start ";
-////                    in.write(start.getBytes());
-////                    for(int i = 0; i < re.getVisibleObj().size(); i++) {
-////                        int tmp = re.getVisibleObj().get(i);
-////                        byte[] bt = String.valueOf(tmp).concat(", ").getBytes();
-////                        in.write(bt, 0 ,bt.length);
-////                        generaterBuffer(buffer, i+2, tmp);
-////                    }
-////                    in.close();
-////                } catch (FileNotFoundException e) {
-////                    e.printStackTrace();
-////                } catch (IOException e) {
-////                    e.printStackTrace();
-////                }
-//
-////                byte[] buffer = new byte[4*3];
-////                generaterBuffer(buffer, 0, 2);
-////                generaterBuffer(buffer, 1, 0);
-////                generaterBuffer(buffer, 2, 1);
-//
-//                return buffer;
-//            }
-//        });
-//        senv.execute("test");
+
+//                byte[] buffer = new byte[4*3];
+//                generaterBuffer(buffer, 0, 2);
+//                generaterBuffer(buffer, 1, 0);
+//                generaterBuffer(buffer, 2, 1);
+
+                return buffer;
+            }
+        });
+        senv.execute("test");
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 

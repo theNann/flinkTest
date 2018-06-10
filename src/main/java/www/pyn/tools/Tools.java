@@ -1,3 +1,5 @@
+package www.pyn.tools;
+
 import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.flink.api.java.DataSet;
 import org.apache.flink.api.java.tuple.Tuple3;
@@ -349,6 +351,9 @@ public class Tools {
     public static List<Integer> removeDuplicateFromList(List<Integer> list) {
         Collections.sort(list);
         List<Integer> listNoDuplicate = new ArrayList<Integer>();
+        if(list.size() == 0) {
+            return listNoDuplicate;
+        }
         listNoDuplicate.add(list.get(0));
         int idx = 0;
         for(int i = 0; i < list.size(); i++) {

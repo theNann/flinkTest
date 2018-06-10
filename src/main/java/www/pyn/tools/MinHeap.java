@@ -1,3 +1,5 @@
+package www.pyn.tools;
+
 import www.pyn.bean.SimilarityTuple;
 
 public class MinHeap {

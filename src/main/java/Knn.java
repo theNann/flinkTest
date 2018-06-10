@@ -2,20 +2,17 @@
  * Created by pyn on 2018/4/2.
  */
 import org.apache.flink.api.common.functions.FlatMapFunction;
-import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.java.DataSet;
 import org.apache.flink.api.java.ExecutionEnvironment;
-import org.apache.flink.api.java.io.LocalCollectionOutputFormat;
-import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.api.java.tuple.Tuple3;
-import org.apache.flink.api.java.tuple.Tuple4;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.core.fs.FileSystem;
 import org.apache.flink.util.Collector;
-import org.omg.CORBA.Environment;
-import scala.concurrent.Promise;
 import www.pyn.bean.*;
+import www.pyn.tools.Tools;
+
 import java.util.*;
+import java.util.List;
 
 @SuppressWarnings("serial")
 // 目前使用Knn-8的方法
@@ -71,7 +68,7 @@ public class Knn {
 //        System.out.println("testTarget size : " + testTarget.size());
 //        HashMap<Integer, PrimitiveData> testData = prepareData.getTestData();
 //        System.out.println("testData size : " + testData.size());
-//        Tools.expandTrainSet(scores, testData, testResult, 13674);
+//        www.pyn.tools.Tools.expandTrainSet(scores, testData, testResult, 13674);
 
         scores.writeAsCsv(writoTofile,"\n",",", FileSystem.WriteMode.OVERWRITE)
                 .setParallelism(1);
@@ -106,9 +103,9 @@ public class Knn {
 //            System.out.println("testDataId : " + dataId + " " + position + " " + direction);
             List<Integer> visibleObjList = new ArrayList<Integer>();
             visibleObjList.clear();
-//            int positionK = Configuration.getInstance().getKnnPositionk();
-//            int directionK = Configuration.getInstance().getKnnDirectionk();
-//            List<SimilarityTuple> kNearestNeighbors = Tools.getNearestNeighbors(trainPosition, position, directionK,
+//            int positionK = www.pyn.tools.Tools.Configuration.getInstance().getKnnPositionk();
+//            int directionK = www.pyn.tools.Tools.Configuration.getInstance().getKnnDirectionk();
+//            List<SimilarityTuple> kNearestNeighbors = www.pyn.tools.Tools.getNearestNeighbors(trainPosition, position, directionK,
 //                    1, positionK, trainDirection, direction);
 //
 //            for(int i = 0; i < kNearestNeighbors.size(); i++) {
@@ -120,19 +117,32 @@ public class Knn {
             int gridX = SceneInfo.ToGridX(position.getPx());
             int gridY = SceneInfo.ToGridY(position.getPy());
             int gridZ = SceneInfo.ToGridZ(position.getPz());
-            GridData gridData = trainData[gridX][gridY][gridZ];
-            int idx = -1;
-            double maxSim = -1;
-            for(int i = 0; i < gridData.primitives.size(); i++) {
-                double[] d = gridData.primitives.get(i).getDirection().getDirection();
-                double sim = Tools.vectorSimlarity(d, direction.getDirection());
-                if(sim > maxSim) {
-                    maxSim = sim;
-                    idx = i;
-                }
+//            List<GridData> neighbors6 = SceneInfo.nearestNeighbors6(gridX, gridY, gridZ, trainData);
+            List<GridData> neighbors = SceneInfo.nearestNeighbors(gridX, gridY, gridZ, position, trainData);
+//            List<GridData> neighbors = SceneInfo.nearestNeighborsByPos(gridX, gridY, gridZ, position, trainData);
+
+            //取neighbors的前2个方向最近的
+            List<Integer> trainDataId = SceneInfo.getResultFromNeighborGrid(neighbors, direction);
+            for(int i = 0; i < trainDataId.size(); i++) {
+                int id = trainDataId.get(i);
+                visibleObjList.addAll(trainResult.get(id).getVisibleObj());
             }
-            visibleObjList.addAll(trainResult.get(gridData.primitives.get(idx).getDataId()).getVisibleObj());
-            collector.collect(new Result(dataId,Tools.removeDuplicateFromList(visibleObjList)));
+
+//
+//             for(GridData gridData : neighbors) {
+//                int idx = -1;
+//                double maxSim = -1;
+//                for (int i = 0; i < gridData.primitives.size(); i++) {
+//                    double[] d = gridData.primitives.get(i).getDirection().getDirection();
+//                    double sim = Tools.vectorSimlarity(d, direction.getDirection());
+//                    if (sim > maxSim) {
+//                        maxSim = sim;
+//                        idx = i;
+//                    }
+//                }
+//                visibleObjList.addAll(trainResult.get(gridData.primitives.get(idx).getDataId()).getVisibleObj());
+//            }
+            collector.collect(new Result(dataId, Tools.removeDuplicateFromList(visibleObjList)));
             System.out.println("dataId : " + dataId);
         }
     }
