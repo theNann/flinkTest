@@ -18,8 +18,8 @@ import java.util.List;
 @SuppressWarnings("serial")
 // 目前使用Knn-8的方法
 public class Knn {
-    private static HashMap<Integer, Position> trainPosition;
-    private static HashMap<Integer, Direction> trainDirection;
+//    private static HashMap<Integer, Position> trainPosition;
+//    private static HashMap<Integer, Direction> trainDirection;
     private static GridData[][][] trainData;
     private DataSet<PrimitiveData> testDataDS;
     private HashMap<Integer, PrimitiveData> testData;
@@ -36,8 +36,8 @@ public class Knn {
         this.params = params;
         this.env = env;
 
-        trainPosition = prepareData.getTrainPosition();
-        trainDirection = prepareData.getTrainDirection();
+//        trainPosition = prepareData.getTrainPosition();
+//        trainDirection = prepareData.getTrainDirection();
         trainData = prepareData.getTrainData();
         testDataDS = prepareData.getTestDataDS();
         testData = prepareData.getTestData();
@@ -123,10 +123,10 @@ public class Knn {
             int gridX = SceneInfo.ToGridX(position.getPx());
             int gridY = SceneInfo.ToGridY(position.getPy());
             int gridZ = SceneInfo.ToGridZ(position.getPz());
-            List<GridData> neighbors7 = SceneInfo.nearestNeighbors7(gridX, gridY, gridZ, trainData);
+//            List<GridData> neighbors7 = SceneInfo.nearestNeighbors7(gridX, gridY, gridZ, trainData);
             List<GridData> neighbors2 = SceneInfo.nearestNeighbors2(gridX, gridY, gridZ, position, trainData);
-            List<GridData> neighbor = SceneInfo.nearestNeighbors1(gridX, gridY, gridZ, trainData);
-            List<Integer> trainDataId = SceneInfo.getTrainIdFromNeighborGrid(neighbor, direction, 1);
+//            List<GridData> neighbor = SceneInfo.nearestNeighbors1(gridX, gridY, gridZ, trainData);
+            List<Integer> trainDataId = SceneInfo.getTrainIdFromNeighborGrid(neighbors2, direction, 1);
             for(int i = 0; i < trainDataId.size(); i++) {
                 int id = trainDataId.get(i);
                 visibleObjList.addAll(trainResult.get(id).getVisibleObj());
@@ -136,21 +136,21 @@ public class Knn {
         }
     }
 
-    public static HashMap<Integer, Position> getTrainPosition() {
-        return trainPosition;
-    }
-
-    public static void setTrainPosition(HashMap<Integer, Position> trainPosition) {
-        Knn.trainPosition = trainPosition;
-    }
-
-    public static HashMap<Integer, Direction> getTrainDirection() {
-        return trainDirection;
-    }
-
-    public static void setTrainDirection(HashMap<Integer, Direction> trainDirection) {
-        Knn.trainDirection = trainDirection;
-    }
+//    public static HashMap<Integer, Position> getTrainPosition() {
+//        return trainPosition;
+//    }
+//
+//    public static void setTrainPosition(HashMap<Integer, Position> trainPosition) {
+//        Knn.trainPosition = trainPosition;
+//    }
+//
+//    public static HashMap<Integer, Direction> getTrainDirection() {
+//        return trainDirection;
+//    }
+//
+//    public static void setTrainDirection(HashMap<Integer, Direction> trainDirection) {
+//        Knn.trainDirection = trainDirection;
+//    }
 
     public DataSet<PrimitiveData> getTestDataDS() {
         return testDataDS;

@@ -3,6 +3,7 @@ package www.pyn.tools;
 import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.flink.api.java.DataSet;
 import org.apache.flink.api.java.tuple.Tuple3;
+import org.omg.CORBA.INTERNAL;
 import www.pyn.bean.*;
 
 import java.io.*;
@@ -227,25 +228,25 @@ public class Tools {
 
     public static void expandTrainSet(DataSet<Tuple3<Integer, Double, Double>> scores, HashMap<Integer,PrimitiveData> testData,
                                       HashMap<Integer, Result> testResult, int startDataId) {
-        List<PrimitiveData> expandData = new ArrayList<PrimitiveData>();
-        List<Result> expandResult = new ArrayList<Result>();
-        try {
-            List<Tuple3<Integer, Double, Double>> list = scores.collect();
-            for(int i = 0; i < list.size(); i++) {
-                if(list.get(i).f1 < 0.8 || list.get(i).f2 < 0.8) {
-                    int dataId = list.get(i).f0;
-                    expandData.add(testData.get(dataId));
-                    expandResult.add(testResult.get(dataId));
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        String trainDataPath = Configuration.getInstance().getTrainDataPath();//"/home/pyn/Desktop/DataSet/tt.csv"
-        String trainTargetPath = Configuration.getInstance().getTrainTargetPath();//"/home/pyn/Desktop/DataSet/tt_result.txt"
-        writeCSV2(expandData, trainDataPath, startDataId);
-        writeTxt2(expandResult, trainTargetPath, startDataId);
+//        List<PrimitiveData> expandData = new ArrayList<PrimitiveData>();
+//        List<Result> expandResult = new ArrayList<Result>();
+//        try {
+//            List<Tuple3<Integer, Double, Double>> list = scores.collect();
+//            for(int i = 0; i < list.size(); i++) {
+//                if(list.get(i).f1 < 0.8 || list.get(i).f2 < 0.8) {
+//                    int dataId = list.get(i).f0;
+//                    expandData.add(testData.get(dataId));
+//                    expandResult.add(testResult.get(dataId));
+//                }
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//
+//        String trainDataPath = Configuration.getInstance().getTrainDataPath();//"/home/pyn/Desktop/DataSet/tt.csv"
+//        String trainTargetPath = Configuration.getInstance().getTrainTargetPath();//"/home/pyn/Desktop/DataSet/tt_result.txt"
+//        writeCSV2(expandData, trainDataPath, startDataId);
+//        writeTxt2(expandResult, trainTargetPath, startDataId);
     }
 
     public static void writeCSV2(List<PrimitiveData> dataList, String finalPath, int startDataId) {
@@ -276,7 +277,7 @@ public class Tools {
                     bw.append(data.getDy() + ",");
                     bw.append(data.getDz() + ",");
                     bw.append(0 + ",");
-                    bw.append(0 + ",");
+                    bw.append(1 + ",");
                     bw.append(0 + ",");
                     bw.append("\n");
                 }
@@ -346,6 +347,38 @@ public class Tools {
                 }
             }
         }
+    }
+
+
+    public static void removeTestData(DataSet<Tuple3<Integer, Double, Double>> scores, HashMap<Integer, PrimitiveData> testData,
+                                      HashMap<Integer, Result> testResult) {
+        List<Tuple3<Integer, Double, Double>> scoresList;
+        List<Integer> removeDataId = new ArrayList<Integer>();
+        try {
+            scoresList = scores.collect();
+            for(int i = 0; i < scoresList.size(); i++) {
+                if(scoresList.get(i).f1 < 0.7 || scoresList.get(i).f2 < 0.7) {
+                    removeDataId.add(scoresList.get(i).f0);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        for(int i = 0; i < removeDataId.size(); i++) {
+            int dataId = removeDataId.get(i);
+            testData.remove(dataId);
+            testResult.remove(dataId);
+        }
+        List<PrimitiveData> testDataList = new ArrayList<PrimitiveData>();
+        List<Result> testResultList = new ArrayList<Result>();
+        for(Map.Entry<Integer, PrimitiveData> entry : testData.entrySet()) {
+            testDataList.add(entry.getValue());
+        }
+        for(Map.Entry<Integer, Result> entry : testResult.entrySet()) {
+            testResultList.add(entry.getValue());
+        }
+        writeCSV2(testDataList, "/home/pyn/Desktop/DataSet/test_data.csv", 0);
+        writeTxt2(testResultList, "/home/pyn/Desktop/DataSet/test_target.txt", 0);
     }
 
     public static List<Integer> removeDuplicateFromList(List<Integer> list) {

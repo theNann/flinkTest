@@ -3,6 +3,7 @@ import org.apache.flink.api.java.DataSet;
 import org.apache.flink.api.java.ExecutionEnvironment;
 import org.apache.flink.util.Collector;
 import www.pyn.bean.Result;
+import www.pyn.tools.Configuration;
 
 import javax.print.attribute.ResolutionSyntax;
 import java.util.*;
@@ -12,25 +13,25 @@ import java.util.*;
  */
 public class PrepareResult {
     private ExecutionEnvironment env;
-    private HashMap<Integer,Result> trainResult;
+    private HashMap<Integer,Result>trainResult;
     private HashMap<Integer,Result> testResult;
-    private String trainFilePath;
-    private String testFilePath;
+    private String[] trainFilePath;
+    private String[] testFilePath;
     private static PrepareResult prepareResult = null;
 
-    private PrepareResult(ExecutionEnvironment env, String trainFilePath, String testFilePath) {
+    private PrepareResult(ExecutionEnvironment env) {
         this.env = env;
-        this.trainFilePath = trainFilePath;
-        this.testFilePath = testFilePath;
+        this.trainFilePath = Configuration.getInstance().getTrainTargetPath();
+        this.testFilePath = Configuration.getInstance().getTestTargetPath();
         trainResult = new HashMap<Integer, Result>();
         testResult = new HashMap<Integer, Result>();
         readTrainResult();
         readTestResult();
     }
 
-    public static PrepareResult getInstance(ExecutionEnvironment env, String trainFilePath, String testFilePath) {
+    public static PrepareResult getInstance(ExecutionEnvironment env) {
         if(prepareResult == null) {
-            prepareResult = new PrepareResult(env, trainFilePath, testFilePath);
+            prepareResult = new PrepareResult(env);
         }
         return prepareResult;
     }
@@ -42,32 +43,34 @@ public class PrepareResult {
         this.testResult = readResult(testFilePath);
     }
 
-    public HashMap<Integer,Result> readResult(String filePath) {
-        DataSet<String> lines = env.readTextFile(filePath);
-        DataSet<Result> ds = lines.flatMap(new FlatMapFunction<String, Result>() {
-            public void flatMap(String s, Collector<Result> collector) throws Exception {
-                String[] split = s.split(", ");
-                int dataId = Integer.valueOf(split[0]);
-                List<Integer> visibleObj = new ArrayList<Integer>();
-                for(int i = 1; i < split.length; i++) {
-                    visibleObj.add(Integer.valueOf(split[i]));
+    public HashMap<Integer,Result> readResult(String[] filePath) {
+        HashMap<Integer, Result> hashMap = new HashMap<Integer, Result>();
+        hashMap.clear();
+        for(int idx = 0; idx < filePath.length; idx += 1) {
+            DataSet<String> lines = env.readTextFile(filePath[idx]);
+            DataSet<Result> ds = lines.flatMap(new FlatMapFunction<String, Result>() {
+                public void flatMap(String s, Collector<Result> collector) throws Exception {
+                    String[] split = s.split(", ");
+                    int dataId = Integer.valueOf(split[0]);
+                    List<Integer> visibleObj = new ArrayList<Integer>();
+                    for (int i = 1; i < split.length; i++) {
+                        visibleObj.add(Integer.valueOf(split[i]));
+                    }
+                    Collections.sort(visibleObj);
+                    Result result = new Result(dataId, visibleObj);
+                    collector.collect(result);
                 }
-                Collections.sort(visibleObj);
-                Result result = new Result(dataId, visibleObj);
-                collector.collect(result);
+            });
+            try {
+                List<Result> rs = ds.collect();
+                for (int i = 0; i < rs.size(); i++) {
+                    hashMap.put(rs.get(i).getDataId(), rs.get(i));
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-        });
-        try {
-            List<Result> rs = ds.collect();
-            HashMap<Integer, Result> hashMap = new HashMap<Integer, Result>();
-            for(int i = 0; i < rs.size(); i++) {
-                hashMap.put(rs.get(i).getDataId(), rs.get(i));
-            }
-            return hashMap;
-        } catch (Exception e) {
-            e.printStackTrace();
         }
-        return null;
+        return hashMap;
     }
 
     public HashMap<Integer,Result> getTrainResult() {

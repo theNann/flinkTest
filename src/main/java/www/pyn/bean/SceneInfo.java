@@ -21,7 +21,7 @@ public class SceneInfo {
     public static double positionYmax = 30;
     public static double positionZmin = -70;
     public static double positionZmax = 130;
-    public static double gridLength = 15;
+    public static double gridLength = 10;
     public static int xGridNumber = (int) Math.ceil((positionXmax - positionXmin) / gridLength);
     public static int yGridNumber = (int) Math.ceil((positionYmax - positionYmin) / gridLength);
     public static int zGridNumber = (int) Math.ceil((positionZmax - positionZmin) / gridLength);
@@ -150,6 +150,8 @@ public class SceneInfo {
                 public int compare(Tuple2<Integer, Double> o1, Tuple2<Integer, Double> o2) {
                     if(o2._2 > o1._2) {
                         return 1;
+                    } else if(o2._2.equals(o1._2)){
+                        return 0;
                     } else {
                         return -1;
                     }

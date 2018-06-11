@@ -12,8 +12,8 @@ import www.pyn.tools.Tools;
 import java.util.*;
 
 public class Recommender {
-    private static HashMap<Integer, Position> trainPosition;
-    private static HashMap<Integer, Direction> trainDirection;
+//    private static HashMap<Integer, Position> trainPosition;
+//    private static HashMap<Integer, Direction> trainDirection;
     private DataSet<PrimitiveData> testDataDS;
     private HashMap<Integer, PrimitiveData> testData;
 
@@ -29,8 +29,8 @@ public class Recommender {
         this.params = params;
         this.env = env;
 
-        trainPosition = prepareData.getTrainPosition();
-        trainDirection = prepareData.getTrainDirection();
+//        trainPosition = prepareData.getTrainPosition();
+//        trainDirection = prepareData.getTrainDirection();
         testDataDS = prepareData.getTestDataDS();
         testData = prepareData.getTestData();
 
@@ -50,29 +50,29 @@ public class Recommender {
 
     public static final class recommenderMap implements FlatMapFunction<PrimitiveData, Result> {
         public void flatMap(PrimitiveData primitiveData, Collector<Result> collector) throws Exception {
-            int k = Configuration.getInstance().getReck();
-            int howMany = Configuration.getInstance().getRecHowMany();
-            int maxK = 15;
-            int dataId = primitiveData.getDataId();
-            Position position = primitiveData.getPosition();
-            Direction direction = primitiveData.getDirection();
-            List<Integer> visibleObjList = new ArrayList<Integer>();
-            visibleObjList.clear();
-            //KNN
-            List<SimilarityTuple> kNearestNeighbors = Tools.getNearestNeighbors(trainPosition, position, k,
-                    1, maxK, trainDirection, direction);
-            //CollaborativeFiltering
-            for(int i = 0; i < kNearestNeighbors.size(); i++) {
-                int simId = kNearestNeighbors.get(i).dataId;
-                List<Integer> visibleObj = trainResult.get(simId).getVisibleObj();
-                List<SimilarityTuple> recommendNearestNeighbors = Tools.userBasedRecommend(trainResult, visibleObj, howMany);
-                for(int j = 0; j < recommendNearestNeighbors.size(); j++) {
-                    int _simId = recommendNearestNeighbors.get(j).dataId;
-                    List<Integer> _visibleObj = trainResult.get(_simId).getVisibleObj();
-                    visibleObjList.addAll(_visibleObj);
-                }
-            }
-            collector.collect(new Result(dataId, Tools.removeDuplicateFromList(visibleObjList)));
+//            int k = Configuration.getInstance().getReck();
+//            int howMany = Configuration.getInstance().getRecHowMany();
+//            int maxK = 15;
+//            int dataId = primitiveData.getDataId();
+//            Position position = primitiveData.getPosition();
+//            Direction direction = primitiveData.getDirection();
+//            List<Integer> visibleObjList = new ArrayList<Integer>();
+//            visibleObjList.clear();
+//            //KNN
+//            List<SimilarityTuple> kNearestNeighbors = Tools.getNearestNeighbors(trainPosition, position, k,
+//                    1, maxK, trainDirection, direction);
+//            //CollaborativeFiltering
+//            for(int i = 0; i < kNearestNeighbors.size(); i++) {
+//                int simId = kNearestNeighbors.get(i).dataId;
+//                List<Integer> visibleObj = trainResult.get(simId).getVisibleObj();
+//                List<SimilarityTuple> recommendNearestNeighbors = Tools.userBasedRecommend(trainResult, visibleObj, howMany);
+//                for(int j = 0; j < recommendNearestNeighbors.size(); j++) {
+//                    int _simId = recommendNearestNeighbors.get(j).dataId;
+//                    List<Integer> _visibleObj = trainResult.get(_simId).getVisibleObj();
+//                    visibleObjList.addAll(_visibleObj);
+//                }
+//            }
+//            collector.collect(new Result(dataId, Tools.removeDuplicateFromList(visibleObjList)));
         }
     }
 

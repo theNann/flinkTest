@@ -12,8 +12,8 @@ import www.pyn.tools.Tools;
 import java.util.*;
 
 public class CollaborativeFiltering {
-    private static HashMap<Integer, Position> trainPosition;
-    private static HashMap<Integer, Direction> trainDirection;
+//    private static HashMap<Integer, Position> trainPosition;
+//    private static HashMap<Integer, Direction> trainDirection;
     private DataSet<PrimitiveData> testDataDS;
     private HashMap<Integer, PrimitiveData> testData;
 
@@ -30,8 +30,8 @@ public class CollaborativeFiltering {
         this.params = params;
         this.env = env;
 
-        trainPosition = prepareData.getTrainPosition();
-        trainDirection = prepareData.getTrainDirection();
+//        trainPosition = prepareData.getTrainPosition();
+//        trainDirection = prepareData.getTrainDirection();
         testDataDS = prepareData.getTestDataDS();
         testData = prepareData.getTestData();
 
@@ -68,33 +68,33 @@ public class CollaborativeFiltering {
 
     public static final class recommenderMap implements FlatMapFunction<PrimitiveData, Result> {
         public void flatMap(PrimitiveData primitiveData, Collector<Result> collector) throws Exception {
-            int dataId = primitiveData.getDataId();
-            Position position = primitiveData.getPosition();
-            Direction direction = primitiveData.getDirection();
-            List<SimilarityTuple> coldStartNearestNeighbor = Tools.getNearestNeighbors(trainPosition, position, 1,
-                    1, 15, trainDirection, direction);
-            List<Integer> visibleObjList = new ArrayList<Integer>();
-            visibleObjList.clear();
-            int coldStartDataId = coldStartNearestNeighbor.get(0).dataId;
-            for(int i = 0; i < coldStartNearestNeighbor.size(); i++) {
-                int simId = coldStartNearestNeighbor.get(i).dataId;
-                Result rs = trainResult.get(simId);
-                visibleObjList.addAll(rs.getVisibleObj());
-            }
-            Collections.sort(visibleObjList);
-            int howMany = Configuration.getInstance().getCFHowMany();
-            List<SimilarityTuple> recommendNearestNeighbors = Tools.userBasedRecommend(trainResult, visibleObjList, howMany);
-            for(int i = 0; i < recommendNearestNeighbors.size(); i++) {
-                int simId = recommendNearestNeighbors.get(i).dataId;
-                if(simId == coldStartDataId) {
-                    continue;
-                }
-                Result rs = trainResult.get(simId);
-                visibleObjList.addAll(rs.getVisibleObj());
-            }
-            //去重
-            List<Integer> visibleObjListNoDuplicate = Tools.removeDuplicateFromList(visibleObjList);
-            collector.collect(new Result(dataId, new ArrayList<Integer>(visibleObjListNoDuplicate)));
+//            int dataId = primitiveData.getDataId();
+//            Position position = primitiveData.getPosition();
+//            Direction direction = primitiveData.getDirection();
+//            List<SimilarityTuple> coldStartNearestNeighbor = Tools.getNearestNeighbors(trainPosition, position, 1,
+//                    1, 15, trainDirection, direction);
+//            List<Integer> visibleObjList = new ArrayList<Integer>();
+//            visibleObjList.clear();
+//            int coldStartDataId = coldStartNearestNeighbor.get(0).dataId;
+//            for(int i = 0; i < coldStartNearestNeighbor.size(); i++) {
+//                int simId = coldStartNearestNeighbor.get(i).dataId;
+//                Result rs = trainResult.get(simId);
+//                visibleObjList.addAll(rs.getVisibleObj());
+//            }
+//            Collections.sort(visibleObjList);
+//            int howMany = Configuration.getInstance().getCFHowMany();
+//            List<SimilarityTuple> recommendNearestNeighbors = Tools.userBasedRecommend(trainResult, visibleObjList, howMany);
+//            for(int i = 0; i < recommendNearestNeighbors.size(); i++) {
+//                int simId = recommendNearestNeighbors.get(i).dataId;
+//                if(simId == coldStartDataId) {
+//                    continue;
+//                }
+//                Result rs = trainResult.get(simId);
+//                visibleObjList.addAll(rs.getVisibleObj());
+//            }
+//            //去重
+//            List<Integer> visibleObjListNoDuplicate = Tools.removeDuplicateFromList(visibleObjList);
+//            collector.collect(new Result(dataId, new ArrayList<Integer>(visibleObjListNoDuplicate)));
         }
     }
 }

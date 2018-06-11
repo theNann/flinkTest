@@ -7,10 +7,10 @@ public class Configuration {
     private String ip;
     private int readPort;
     private int writePort;
-    private String trainDataPath;
-    private String testDataPath;
-    private String trainTargetPath;
-    private String testTargetPath;
+    private String[] trainDataPath;
+    private String[] testDataPath;
+    private String[] trainTargetPath;
+    private String[] testTargetPath;
     private int knnPositionk;
     private int knnDirectionk;
     private int CFHowMany;
@@ -57,35 +57,35 @@ public class Configuration {
         this.writePort = writePort;
     }
 
-    public String getTrainDataPath() {
+    public String[] getTrainDataPath() {
         return trainDataPath;
     }
 
-    public void setTrainDataPath(String trainDataPath) {
+    public void setTrainDataPath(String[] trainDataPath) {
         this.trainDataPath = trainDataPath;
     }
 
-    public String getTestDataPath() {
-        return testDataPath;
-    }
-
-    public void setTestDataPath(String testDataPath) {
-        this.testDataPath = testDataPath;
-    }
-
-    public String getTrainTargetPath() {
+    public String[] getTrainTargetPath() {
         return trainTargetPath;
     }
 
-    public void setTrainTargetPath(String trainTargetPath) {
+    public void setTrainTargetPath(String[] trainTargetPath) {
         this.trainTargetPath = trainTargetPath;
     }
 
-    public String getTestTargetPath() {
+    public String[] getTestDataPath() {
+        return testDataPath;
+    }
+
+    public void setTestDataPath(String[] testDataPath) {
+        this.testDataPath = testDataPath;
+    }
+
+    public String[] getTestTargetPath() {
         return testTargetPath;
     }
 
-    public void setTestTargetPath(String testTargetPath) {
+    public void setTestTargetPath(String[] testTargetPath) {
         this.testTargetPath = testTargetPath;
     }
 
