@@ -16,6 +16,8 @@ public class Configuration {
     private int CFHowMany;
     private int Reck;
     private int RecHowMany;
+    private String KnnWriteToFile;
+
     private static Configuration instance = null;
 
     private Configuration() {
@@ -125,5 +127,13 @@ public class Configuration {
 
     public void setRecHowMany(int recHowMany) {
         RecHowMany = recHowMany;
+    }
+
+    public String getKnnWriteToFile() {
+        return KnnWriteToFile;
+    }
+
+    public void setKnnWriteToFile(String knnWriteToFile) {
+        KnnWriteToFile = knnWriteToFile;
     }
 }

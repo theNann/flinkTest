@@ -9,6 +9,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import static www.pyn.tools.Tools.euclideanDistanceSim;
+
 /**
  * Created by pyn on 2018/6/9.
  */
@@ -36,7 +38,13 @@ public class SceneInfo {
         return Clamp((int)Math.floor((z + 70) / gridLength), 0, zGridNumber - 1);
     }
 
-    public static List<GridData> nearestNeighbors6(int gridX, int gridY, int gridZ, GridData[][][] trainData) {
+    public static List<GridData> nearestNeighbors1(int gridX, int gridY, int gridZ, GridData[][][] trainData) {
+        List<GridData> list = new ArrayList<GridData>();
+        list.add(trainData[gridX][gridY][gridZ]);
+        return list;
+    }
+
+    public static List<GridData> nearestNeighbors7(int gridX, int gridY, int gridZ, GridData[][][] trainData) {
         List<GridData> gridDataList = new ArrayList<GridData>();
         gridDataList.add(trainData[gridX][gridY][gridZ]);
         if(gridY+1 < SceneInfo.yGridNumber) {
@@ -60,69 +68,58 @@ public class SceneInfo {
         return gridDataList;
     }
 
-    public static List<GridData> nearestNeighbors(int gridX, int gridY, int gridZ, Position position, GridData[][][] trainData) {
+    public static List<GridData> nearestNeighbors2(int gridX, int gridY, int gridZ, Position position, GridData[][][] trainData) {
         List<GridData> list  = new ArrayList<GridData>();
         list.add(trainData[gridX][gridY][gridZ]);
         Position gridPosition = trainData[gridX][gridY][gridZ].primitives.get(0).getPosition();
         double xx = position.getPx() - gridPosition.getPx();
         double yy = position.getPy() - gridPosition.getPy();
         double zz = position.getPz() - gridPosition.getPz();
-        //xyz分别取一个
-        if(xx > 0 && gridX+1 < xGridNumber) {
-            list.add(trainData[gridX+1][gridY][gridZ]);
-        } else if(xx < 0 && gridX-1 >= 0) {
-            list.add(trainData[gridX-1][gridY][gridZ]);
-        }
-        if(yy > 0 && gridY+1 < yGridNumber) {
-            list.add(trainData[gridX][gridY+1][gridZ]);
-        } else if(yy < 0 && gridY-1 >= 0) {
-            list.add(trainData[gridX][gridY-1][gridZ]);
-        }
-        if(zz > 0 && gridZ+1 < zGridNumber) {
-            list.add(trainData[gridX][gridY][gridZ+1]);
-        } else if(zz < 0 && gridZ-1 >= 0) {
-            list.add(trainData[gridX][gridY][gridZ-1]);
-        }
-        //xyz中取一个
-        //        if(Math.abs(xx) >= Math.abs(yy) && Math.abs(xx) >= Math.abs(zz)) {
-//            if(xx > 0 && gridX+1 < xGridNumber) {
-//                list.add(trainData[gridX+1][gridY][gridZ]);
-//            } else if(xx < 0 && gridX-1 >= 0){
-//                list.add(trainData[gridX-1][gridY][gridZ]);
-//            }
-//        } else if(Math.abs(yy) >= Math.abs(xx) && Math.abs(yy) >= Math.abs(xx)) {
-//            if(yy > 0 && gridY+1 < yGridNumber) {
-//                list.add(trainData[gridX][gridY+1][gridZ]);
-//            } else if(yy < 0 && gridY-1 >= 0){
-//                list.add(trainData[gridX][gridY-1][gridZ]);
-//            }
-//        } else if(Math.abs(zz) >= Math.abs(xx) && Math.abs(zz) >= Math.abs(yy)) {
-//            if(zz > 0 && gridZ+1 < yGridNumber) {
-//                list.add(trainData[gridX][gridY][gridZ+1]);
-//            } else if(zz < 0 && gridZ-1 >= 0){
-//                list.add(trainData[gridX][gridY][gridZ-1]);
-//            }
+        //xyz分别取一个, 共3个
+//        if(xx > 0 && gridX+1 < xGridNumber) {
+//            list.add(trainData[gridX+1][gridY][gridZ]);
+//        } else if(xx < 0 && gridX-1 >= 0) {
+//            list.add(trainData[gridX-1][gridY][gridZ]);
 //        }
-
+//        if(yy > 0 && gridY+1 < yGridNumber) {
+//            list.add(trainData[gridX][gridY+1][gridZ]);
+//        } else if(yy < 0 && gridY-1 >= 0) {
+//            list.add(trainData[gridX][gridY-1][gridZ]);
+//        }
+//        if(zz > 0 && gridZ+1 < zGridNumber) {
+//            list.add(trainData[gridX][gridY][gridZ+1]);
+//        } else if(zz < 0 && gridZ-1 >= 0) {
+//            list.add(trainData[gridX][gridY][gridZ-1]);
+//        }
+        //xyz中取一个，共1个
+        if(Math.abs(xx) >= Math.abs(yy) && Math.abs(xx) >= Math.abs(zz)) {
+            if(xx > 0 && gridX+1 < xGridNumber) {
+                list.add(trainData[gridX+1][gridY][gridZ]);
+            } else if(xx < 0 && gridX-1 >= 0){
+                list.add(trainData[gridX-1][gridY][gridZ]);
+            }
+        } else if(Math.abs(yy) >= Math.abs(xx) && Math.abs(yy) >= Math.abs(xx)) {
+            if(yy > 0 && gridY+1 < yGridNumber) {
+                list.add(trainData[gridX][gridY+1][gridZ]);
+            } else if(yy < 0 && gridY-1 >= 0){
+                list.add(trainData[gridX][gridY-1][gridZ]);
+            }
+        } else if(Math.abs(zz) >= Math.abs(xx) && Math.abs(zz) >= Math.abs(yy)) {
+            if(zz > 0 && gridZ+1 < yGridNumber) {
+                list.add(trainData[gridX][gridY][gridZ+1]);
+            } else if(zz < 0 && gridZ-1 >= 0){
+                list.add(trainData[gridX][gridY][gridZ-1]);
+            }
+        }
         return list;
     }
 
-    public static double euclideanDistanceSim(double[] v1, double[] v2) {
-        ArrayRealVector vec1 = new ArrayRealVector(v1);
-        ArrayRealVector vec2 = new ArrayRealVector(v2);
-        ArrayRealVector tmp = vec1.subtract(vec2);
-        double dist = tmp.getNorm();
-        double sim = 1.0 / (1.0+dist);
-        return sim;
-    }
-
-    public static List<GridData> nearestNeighborsByPos(int gridX, int gridY, int gridZ, Position position, GridData[][][] trainData) {
+    public static List<GridData> nearestNeighbors2ByPos(int gridX, int gridY, int gridZ, Position position, GridData[][][] trainData) {
         List<GridData> list = new ArrayList<GridData>();
-        list.add(trainData[gridX][gridY][gridZ]);
         List<Tuple2<Integer, Double>> sim = new ArrayList<Tuple2<Integer, Double>>();
-        List<GridData> neighbors6 = nearestNeighbors6(gridX, gridY, gridZ, trainData);
-        for(int i = 1; i < neighbors6.size(); i++) {
-            Position gridPosition = neighbors6.get(i).primitives.get(0).getPosition();
+        List<GridData> neighbors7 = nearestNeighbors7(gridX, gridY, gridZ, trainData);
+        for(int i = 0; i < neighbors7.size(); i++) {
+            Position gridPosition = neighbors7.get(i).primitives.get(0).getPosition();
             double sim_i = euclideanDistanceSim(position.getPosition(), gridPosition.getPosition());
             sim.add(new Tuple2<Integer, Double>(i, sim_i));
         }
@@ -135,11 +132,12 @@ public class SceneInfo {
                 }
             }
         });
-        list.add(neighbors6.get(sim.get(0)._1));
+        list.add(neighbors7.get(sim.get(0)._1));
+        list.add(neighbors7.get(sim.get(1)._1));
         return list;
     }
 
-    public static List<Integer> getResultFromNeighborGrid(List<GridData> neighbors, Direction direction) {
+    public static List<Integer> getTrainIdFromNeighborGrid(List<GridData> neighbors, Direction direction, int k) {
         List<Integer> trainDataId = new ArrayList<Integer>();
         for(int i = 0; i < neighbors.size(); i++) {
             List<PrimitiveData> primitiveData = neighbors.get(i).primitives;
@@ -157,8 +155,9 @@ public class SceneInfo {
                     }
                 }
             });
-            trainDataId.add(primitiveData.get(sim.get(0)._1).dataId);
-            trainDataId.add(primitiveData.get(sim.get(1)._1).dataId);
+            for(int j = 0; j < k; j++) {
+                trainDataId.add(primitiveData.get(sim.get(j)._1).dataId);
+            }
         }
         return trainDataId;
     }

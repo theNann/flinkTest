@@ -9,6 +9,7 @@ import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.core.fs.FileSystem;
 import org.apache.flink.util.Collector;
 import www.pyn.bean.*;
+import www.pyn.tools.Configuration;
 import www.pyn.tools.Tools;
 
 import java.util.*;
@@ -29,7 +30,6 @@ public class Knn {
 
     private ExecutionEnvironment env;
     private ParameterTool params;
-    private String writoTofile = "E:\\DataSet\\knnScore.csv";
 
     public Knn(ParameterTool params, ExecutionEnvironment env, PrepareData prepareData,
                PrepareResult prepareResult) {
@@ -70,7 +70,7 @@ public class Knn {
 //        System.out.println("testData size : " + testData.size());
 //        www.pyn.tools.Tools.expandTrainSet(scores, testData, testResult, 13674);
 
-        scores.writeAsCsv(writoTofile,"\n",",", FileSystem.WriteMode.OVERWRITE)
+        scores.writeAsCsv(Configuration.getInstance().getKnnWriteToFile(),"\n",",", FileSystem.WriteMode.OVERWRITE)
                 .setParallelism(1);
 
         try {
@@ -89,8 +89,14 @@ public class Knn {
             System.out.println("testDataId : " + dataId);
             List<Integer> targetVisibleObj = testResult.get(dataId).getVisibleObj();
             int jiaoSize = Tools.intersection(preditcVisibleObj, targetVisibleObj);
-            double acc = jiaoSize*1.0 / preditcVisibleObj.size();
-            double recall = jiaoSize*1.0 / targetVisibleObj.size();
+            double acc = 1;
+            if(preditcVisibleObj.size() != 0) {
+                acc = jiaoSize * 1.0 / preditcVisibleObj.size();
+            }
+            double recall = 1;
+            if(targetVisibleObj.size() !=0 ) {
+                recall = jiaoSize * 1.0 / targetVisibleObj.size();
+            }
             collector.collect(new Tuple3<Integer, Double, Double>(dataId, acc, recall));
         }
     }
@@ -117,31 +123,14 @@ public class Knn {
             int gridX = SceneInfo.ToGridX(position.getPx());
             int gridY = SceneInfo.ToGridY(position.getPy());
             int gridZ = SceneInfo.ToGridZ(position.getPz());
-//            List<GridData> neighbors6 = SceneInfo.nearestNeighbors6(gridX, gridY, gridZ, trainData);
-            List<GridData> neighbors = SceneInfo.nearestNeighbors(gridX, gridY, gridZ, position, trainData);
-//            List<GridData> neighbors = SceneInfo.nearestNeighborsByPos(gridX, gridY, gridZ, position, trainData);
-
-            //取neighbors的前2个方向最近的
-            List<Integer> trainDataId = SceneInfo.getResultFromNeighborGrid(neighbors, direction);
+            List<GridData> neighbors7 = SceneInfo.nearestNeighbors7(gridX, gridY, gridZ, trainData);
+            List<GridData> neighbors2 = SceneInfo.nearestNeighbors2(gridX, gridY, gridZ, position, trainData);
+            List<GridData> neighbor = SceneInfo.nearestNeighbors1(gridX, gridY, gridZ, trainData);
+            List<Integer> trainDataId = SceneInfo.getTrainIdFromNeighborGrid(neighbor, direction, 1);
             for(int i = 0; i < trainDataId.size(); i++) {
                 int id = trainDataId.get(i);
                 visibleObjList.addAll(trainResult.get(id).getVisibleObj());
             }
-
-//
-//             for(GridData gridData : neighbors) {
-//                int idx = -1;
-//                double maxSim = -1;
-//                for (int i = 0; i < gridData.primitives.size(); i++) {
-//                    double[] d = gridData.primitives.get(i).getDirection().getDirection();
-//                    double sim = Tools.vectorSimlarity(d, direction.getDirection());
-//                    if (sim > maxSim) {
-//                        maxSim = sim;
-//                        idx = i;
-//                    }
-//                }
-//                visibleObjList.addAll(trainResult.get(gridData.primitives.get(idx).getDataId()).getVisibleObj());
-//            }
             collector.collect(new Result(dataId, Tools.removeDuplicateFromList(visibleObjList)));
             System.out.println("dataId : " + dataId);
         }
