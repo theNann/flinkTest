@@ -27,45 +27,45 @@ public class Main {
 
     public static void main(String[] args) throws Exception {
         long startTime = System.currentTimeMillis();
-        Configuration.getInstance().setIp("127.0.0.1");
+        Configuration.getInstance().setIp("10.222.157.161");
         Configuration.getInstance().setReadPort(6001);
         Configuration.getInstance().setWritePort(6002);
-//        String[] trainDataPath = {"/home/pyn/Desktop/DataSet/GridData/gridData0.csv","/home/pyn/Desktop/DataSet/GridData/gridData1.csv",
-//                "/home/pyn/Desktop/DataSet/GridData/gridData2.csv","/home/pyn/Desktop/DataSet/GridData/gridData3.csv",
-//                "/home/pyn/Desktop/DataSet/GridData/gridData4.csv","/home/pyn/Desktop/DataSet/GridData/gridData5.csv",
-//                "/home/pyn/Desktop/DataSet/GridData/gridData6.csv","/home/pyn/Desktop/DataSet/GridData/gridData7.csv",
-//                "/home/pyn/Desktop/DataSet/GridData/gridData8.csv","/home/pyn/Desktop/DataSet/GridData/gridData9.csv"};
-        String[] trainDataPath = {
-                "E:\\DataSet\\GridData\\gridData0.csv","E:\\DataSet\\GridData\\gridData1.csv",
-                "E:\\DataSet\\GridData\\gridData2.csv","E:\\DataSet\\GridData\\gridData3.csv",
-                "E:\\DataSet\\GridData\\gridData4.csv","E:\\DataSet\\GridData\\gridData5.csv",
-                "E:\\DataSet\\GridData\\gridData6.csv","E:\\DataSet\\GridData\\gridData7.csv",
-                "E:\\DataSet\\GridData\\gridData8.csv","E:\\DataSet\\GridData\\gridData9.csv"
-        };
-//        String[] testDataPath = {"/home/pyn/Desktop/DataSet/test_data.csv"};
-        String[] testDataPath = {
-                "E:\\DataSet\\TestData\\test_data.csv",
-//                "E:\\DataSet\\TestData\\test_data_1.csv"
-        };
+        String[] trainDataPath = {"/home/pyn/Desktop/DataSet/GridData/gridData0.csv","/home/pyn/Desktop/DataSet/GridData/gridData1.csv",
+                "/home/pyn/Desktop/DataSet/GridData/gridData2.csv","/home/pyn/Desktop/DataSet/GridData/gridData3.csv",
+                "/home/pyn/Desktop/DataSet/GridData/gridData4.csv","/home/pyn/Desktop/DataSet/GridData/gridData5.csv",
+                "/home/pyn/Desktop/DataSet/GridData/gridData6.csv","/home/pyn/Desktop/DataSet/GridData/gridData7.csv",
+                "/home/pyn/Desktop/DataSet/GridData/gridData8.csv","/home/pyn/Desktop/DataSet/GridData/gridData9.csv"};
+//        String[] trainDataPath = {
+//                "E:\\DataSet\\GridData\\gridData0.csv","E:\\DataSet\\GridData\\gridData1.csv",
+//                "E:\\DataSet\\GridData\\gridData2.csv","E:\\DataSet\\GridData\\gridData3.csv",
+//                "E:\\DataSet\\GridData\\gridData4.csv","E:\\DataSet\\GridData\\gridData5.csv",
+//                "E:\\DataSet\\GridData\\gridData6.csv","E:\\DataSet\\GridData\\gridData7.csv",
+//                "E:\\DataSet\\GridData\\gridData8.csv","E:\\DataSet\\GridData\\gridData9.csv"
+//        };
+        String[] testDataPath = {"/home/pyn/Desktop/DataSet/test_data.csv"};
+//        String[] testDataPath = {
+//                "E:\\DataSet\\TestData\\test_data.csv",
+////                "E:\\DataSet\\TestData\\test_data_1.csv"
+//        };
 
-//        String[] trainTargetPath = {"/home/pyn/Desktop/DataSet/GridData/gridResult0.txt","/home/pyn/Desktop/DataSet/GridData/gridResult1.txt",
-//                "/home/pyn/Desktop/DataSet/GridData/gridResult2.txt","/home/pyn/Desktop/DataSet/GridData/gridResult3.txt",
-//                "/home/pyn/Desktop/DataSet/GridData/gridResult4.txt","/home/pyn/Desktop/DataSet/GridData/gridResult5.txt",
-//                "/home/pyn/Desktop/DataSet/GridData/gridResult6.txt","/home/pyn/Desktop/DataSet/GridData/gridResult7.txt",
-//                "/home/pyn/Desktop/DataSet/GridData/gridResult8.txt","/home/pyn/Desktop/DataSet/GridData/gridResult9.txt"};
-        String[] trainTargetPath = {
-                "E:\\DataSet\\GridData\\gridResult0.txt","E:\\DataSet\\GridData\\gridResult1.txt",
-                "E:\\DataSet\\GridData\\gridResult2.txt","E:\\DataSet\\GridData\\gridResult3.txt",
-                "E:\\DataSet\\GridData\\gridResult4.txt","E:\\DataSet\\GridData\\gridResult5.txt",
-                "E:\\DataSet\\GridData\\gridResult6.txt","E:\\DataSet\\GridData\\gridResult7.txt",
-                "E:\\DataSet\\GridData\\gridResult8.txt","E:\\DataSet\\GridData\\gridResult9.txt"
-        };
+        String[] trainTargetPath = {"/home/pyn/Desktop/DataSet/GridData/gridResult0.txt","/home/pyn/Desktop/DataSet/GridData/gridResult1.txt",
+                "/home/pyn/Desktop/DataSet/GridData/gridResult2.txt","/home/pyn/Desktop/DataSet/GridData/gridResult3.txt",
+                "/home/pyn/Desktop/DataSet/GridData/gridResult4.txt","/home/pyn/Desktop/DataSet/GridData/gridResult5.txt",
+                "/home/pyn/Desktop/DataSet/GridData/gridResult6.txt","/home/pyn/Desktop/DataSet/GridData/gridResult7.txt",
+                "/home/pyn/Desktop/DataSet/GridData/gridResult8.txt","/home/pyn/Desktop/DataSet/GridData/gridResult9.txt"};
+//        String[] trainTargetPath = {
+//                "E:\\DataSet\\GridData\\gridResult0.txt","E:\\DataSet\\GridData\\gridResult1.txt",
+//                "E:\\DataSet\\GridData\\gridResult2.txt","E:\\DataSet\\GridData\\gridResult3.txt",
+//                "E:\\DataSet\\GridData\\gridResult4.txt","E:\\DataSet\\GridData\\gridResult5.txt",
+//                "E:\\DataSet\\GridData\\gridResult6.txt","E:\\DataSet\\GridData\\gridResult7.txt",
+//                "E:\\DataSet\\GridData\\gridResult8.txt","E:\\DataSet\\GridData\\gridResult9.txt"
+//        };
 //        String[] testTargetPath = {"/home/pyn/Desktop/DataSet/grid_target_train.txt"};
-//        String[] testTargetPath = {"/home/pyn/Desktop/DataSet/test_target.txt"};
-        String[] testTargetPath = {
-                "E:\\DataSet\\TestData\\test_target.txt",
-//                "E:\\DataSet\\TestData\\test_target_1.txt"
-        };
+        String[] testTargetPath = {"/home/pyn/Desktop/DataSet/test_target.txt"};
+//        String[] testTargetPath = {
+//                "E:\\DataSet\\TestData\\test_target.txt",
+////                "E:\\DataSet\\TestData\\test_target_1.txt"
+//        };
         Configuration.getInstance().setTrainDataPath(trainDataPath);
         Configuration.getInstance().setTestDataPath(testDataPath);
         Configuration.getInstance().setTrainTargetPath(trainTargetPath);
@@ -81,13 +81,15 @@ public class Main {
         PrepareData prepareData = PrepareData.getInstance(env);
         PrepareResult prepareResult = PrepareResult.getInstance(env);
         long prepareTime = System.currentTimeMillis();
-
-//        Configuration.getInstance().setKnnPositionk(48);
+        //将所有训练数据的结果存入到二进制文件中
+//        int objCnt = Tools.writeToBinary(prepareResult.getTrainResult(), "/home/pyn/Desktop/DataSet/train_target.dat");
+//        System.out.println("ObjCnt : " + objCnt);
+        //        Configuration.getInstance().setKnnPositionk(48);
 //        Configuration.getInstance().setKnnDirectionk(2);
 //        www.pyn.tools.Tools.Configuration.getInstance().setReck(2);
 //        www.pyn.tools.Tools.Configuration.getInstance().setRecHowMany(3);
 //        www.pyn.tools.Tools.Configuration.getInstance().setCFHowMany(4);
-        Knn knn = new Knn(params, env, prepareData, prepareResult);
+//        Knn knn = new Knn(params, env, prepareData, prepareResult);
 //        Recommender recommender = new Recommender(params, env, prepareData, prepareResult);
 //        CollaborativeFiltering collaborativeFiltering = new CollaborativeFiltering(params, env, prepareData, prepareResult);
 
@@ -98,7 +100,7 @@ public class Main {
         //for(int k = 2; k <= 7; k += 1)
         {
             //www.pyn.tools.Tools.Configuration.getInstance().setKnnDirectionk(k);
-            DataSet<Tuple3<Integer, Double, Double>> scores = knn.solveKnn();
+//            DataSet<Tuple3<Integer, Double, Double>> scores = knn.solveKnn();
 //            Tools.expandTrainSet(scores, prepareData.getTestData(), prepareResult.getTestResult(),5243);
 //            Tools.removeTestData(scores, prepareData.getTestData(), prepareResult.getTestResult());
 //            Tuple3<Integer, Double, Double> avg = www.pyn.tools.Tools.calScoresAvg(scores);
@@ -118,7 +120,7 @@ public class Main {
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        //與c++交互
+        //与OcclusionCulling交互
 //        StreamExecutionEnvironment senv = StreamExecutionEnvironment.getExecutionEnvironment();
 //        String ip = Configuration.getInstance().getIp();
 //        int readPort = Configuration.getInstance().getReadPort();

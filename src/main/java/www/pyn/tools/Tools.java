@@ -4,6 +4,7 @@ import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.flink.api.java.DataSet;
 import org.apache.flink.api.java.tuple.Tuple3;
 import org.omg.CORBA.INTERNAL;
+import scala.Int;
 import www.pyn.bean.*;
 
 import java.io.*;
@@ -419,5 +420,30 @@ public class Tools {
         }
         return new Tuple3<Integer, Double, Double>(Configuration.getInstance().getKnnDirectionk(), accSum / len,
                 recallSum / len);
+    }
+
+    public static int writeToBinary(HashMap<Integer,Result> result, String filePath) {
+        int objCnt = 0;
+        DataOutputStream dos = null;
+        try{
+            if(!new File(filePath).exists()){
+                new File(filePath).createNewFile();
+            }
+            dos=new DataOutputStream(new FileOutputStream(new File(filePath)));
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+        try {
+            for (Map.Entry<Integer, Result> entry : result.entrySet()) {
+                List<Integer> visibleObj = entry.getValue().getVisibleObj();
+                for (int i = 0; i < visibleObj.size(); i++) {
+                    dos.writeInt(visibleObj.get(i));
+                    objCnt += 1;
+                }
+            }
+        }catch (Exception e) {
+            e.printStackTrace();
+        }
+        return objCnt;
     }
 }
