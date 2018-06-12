@@ -126,7 +126,7 @@ public class Knn {
 //            List<GridData> neighbors7 = SceneInfo.nearestNeighbors7(gridX, gridY, gridZ, trainData);
             List<GridData> neighbors2 = SceneInfo.nearestNeighbors2(gridX, gridY, gridZ, position, trainData);
 //            List<GridData> neighbor = SceneInfo.nearestNeighbors1(gridX, gridY, gridZ, trainData);
-            List<Integer> trainDataId = SceneInfo.getTrainIdFromNeighborGrid(neighbors2, direction, 1);
+            List<Integer> trainDataId = SceneInfo.getTrainIdFromNeighborGrid(neighbors2, direction, 2);
             for(int i = 0; i < trainDataId.size(); i++) {
                 int id = trainDataId.get(i);
                 visibleObjList.addAll(trainResult.get(id).getVisibleObj());

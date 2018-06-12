@@ -228,26 +228,30 @@ public class Tools {
 
     public static void expandTrainSet(DataSet<Tuple3<Integer, Double, Double>> scores, HashMap<Integer,PrimitiveData> testData,
                                       HashMap<Integer, Result> testResult, int startDataId) {
-//        List<PrimitiveData> expandData = new ArrayList<PrimitiveData>();
-//        List<Result> expandResult = new ArrayList<Result>();
-//        try {
-//            List<Tuple3<Integer, Double, Double>> list = scores.collect();
-//            for(int i = 0; i < list.size(); i++) {
-//                if(list.get(i).f1 < 0.8 || list.get(i).f2 < 0.8) {
-//                    int dataId = list.get(i).f0;
-//                    expandData.add(testData.get(dataId));
-//                    expandResult.add(testResult.get(dataId));
-//                }
-//            }
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//
-//        String trainDataPath = Configuration.getInstance().getTrainDataPath();//"/home/pyn/Desktop/DataSet/tt.csv"
-//        String trainTargetPath = Configuration.getInstance().getTrainTargetPath();//"/home/pyn/Desktop/DataSet/tt_result.txt"
-//        writeCSV2(expandData, trainDataPath, startDataId);
-//        writeTxt2(expandResult, trainTargetPath, startDataId);
+        List<PrimitiveData> expandData = new ArrayList<PrimitiveData>();
+        List<Result> expandResult = new ArrayList<Result>();
+        try {
+            List<Tuple3<Integer, Double, Double>> list = scores.collect();
+            for(int i = 0; i < list.size(); i++) {
+                if(list.get(i).f1 > 0.7 && list.get(i).f1 <= 0.8 && list.get(i).f2 > 0.7) {
+                    int dataId = list.get(i).f0;
+                    expandData.add(testData.get(dataId));
+                    expandResult.add(testResult.get(dataId));
+//                    if(expandData.size() >= 1000) {
+//                        break;
+//                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        String expandDataFile = "E:\\DataSet\\TestData\\test_data.csv";//"/home/pyn/Desktop/DataSet/tt.csv"
+        String expandTargetFile = "E:\\DataSet\\TestData\\test_target.txt";//"/home/pyn/Desktop/DataSet/tt_result.txt"
+        writeCSV2(expandData, expandDataFile, startDataId);
+        writeTxt2(expandResult, expandTargetFile, startDataId);
     }
+
 
     public static void writeCSV2(List<PrimitiveData> dataList, String finalPath, int startDataId) {
         FileOutputStream out = null;
@@ -270,7 +274,7 @@ public class Tools {
             if (dataList != null && !dataList.isEmpty()) {
                 for (PrimitiveData data : dataList) {
                     bw.append((startDataId++) + ",");
-                    bw.append(data.getPx()+",");
+                    bw.append(data.getPx() + ",");
                     bw.append(data.getPy() + ",");
                     bw.append(data.getPz() + ",");
                     bw.append(data.getDx() + ",");
