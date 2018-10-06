@@ -424,6 +424,7 @@ public class Tools {
 
     public static int writeToBinary(HashMap<Integer,Result> result, String filePath) {
         int objCnt = 0;
+        int cnt = 0;
         DataOutputStream dos = null;
         try{
             if(!new File(filePath).exists()){
@@ -436,11 +437,21 @@ public class Tools {
         try {
             for (Map.Entry<Integer, Result> entry : result.entrySet()) {
                 List<Integer> visibleObj = entry.getValue().getVisibleObj();
+                dos.writeInt(entry.getKey());
+                dos.writeShort(entry.getValue().getVisibleObj().size());
+
                 for (int i = 0; i < visibleObj.size(); i++) {
-                    dos.writeInt(visibleObj.get(i));
+                    if (visibleObj.get(i) > Short.MAX_VALUE) {
+                        System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@");
+                        System.out.println(visibleObj.get(i));
+                    }
+                    dos.writeShort(visibleObj.get(i));
                     objCnt += 1;
                 }
+                System.out.println("cnt : " + cnt);
+                cnt += 1;
             }
+            dos.close();
         }catch (Exception e) {
             e.printStackTrace();
         }

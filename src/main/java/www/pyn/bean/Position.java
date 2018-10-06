@@ -17,6 +17,11 @@ public class Position implements Serializable{
         this.py = py;
         this.pz = pz;
     }
+    public Position(double px, double py, double pz) {
+        this.px = px;
+        this.py = py;
+        this.pz = pz;
+    }
 
     public double[] getPosition() {
         double[] p = {px, py, pz};

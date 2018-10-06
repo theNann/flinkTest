@@ -68,11 +68,11 @@ public class SocketByteStreamFunction implements SourceFunction<byte[]>{
 //        System.out.println("function socket : " + this.currentSocket);//null?
         while(this.isRunning) {
             Socket socket = new Socket();
-            System.out.println("new Socket!!!!!");
+           // System.out.println("new Socket!!!!!");
             Throwable var6 = null;
             try {
                 this.currentSocket = socket;
-                LOG.info("Connecting to server socket " + hostname + ':' + port);
+               // LOG.info("Connecting to server socket " + hostname + ':' + port);
                 socket.connect(new InetSocketAddress(hostname, port), 0);
                 InputStream input = socket.getInputStream();
                 byte[] in = new byte[byteNum];//因为每个数据是68byte,8160/68=120,也就是每次读120个数据

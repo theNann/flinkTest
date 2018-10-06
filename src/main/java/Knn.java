@@ -86,7 +86,7 @@ public class Knn {
         public void flatMap(Result result, Collector<Tuple3<Integer, Double, Double>> collector) throws Exception {
             int dataId = result.getDataId();
             List<Integer> preditcVisibleObj = result.getVisibleObj();
-            System.out.println("testDataId : " + dataId);
+//            System.out.println("testDataId : " + dataId);
             List<Integer> targetVisibleObj = testResult.get(dataId).getVisibleObj();
             int jiaoSize = Tools.intersection(preditcVisibleObj, targetVisibleObj);
             double acc = 1;
@@ -94,7 +94,7 @@ public class Knn {
                 acc = jiaoSize * 1.0 / preditcVisibleObj.size();
             }
             double recall = 1;
-            if(targetVisibleObj.size() !=0 ) {
+            if(targetVisibleObj.size() != 0 ) {
                 recall = jiaoSize * 1.0 / targetVisibleObj.size();
             }
             collector.collect(new Tuple3<Integer, Double, Double>(dataId, acc, recall));
@@ -106,7 +106,7 @@ public class Knn {
             int dataId = primitiveData.getDataId();
             Position position = primitiveData.getPosition();
             Direction direction = primitiveData.getDirection();
-//            System.out.println("testDataId : " + dataId + " " + position + " " + direction);
+           // System.out.println("testDataId : " + dataId);
             List<Integer> visibleObjList = new ArrayList<Integer>();
             visibleObjList.clear();
 //            int positionK = www.pyn.tools.Tools.Configuration.getInstance().getKnnPositionk();
@@ -124,15 +124,15 @@ public class Knn {
             int gridY = SceneInfo.ToGridY(position.getPy());
             int gridZ = SceneInfo.ToGridZ(position.getPz());
 //            List<GridData> neighbors7 = SceneInfo.nearestNeighbors7(gridX, gridY, gridZ, trainData);
-            List<GridData> neighbors2 = SceneInfo.nearestNeighbors2(gridX, gridY, gridZ, position, trainData);
-//            List<GridData> neighbor = SceneInfo.nearestNeighbors1(gridX, gridY, gridZ, trainData);
-            List<Integer> trainDataId = SceneInfo.getTrainIdFromNeighborGrid(neighbors2, direction, 2);
+//            List<GridData> neighbors2 = SceneInfo.nearestNeighbors2(gridX, gridY, gridZ, position, trainData);
+            //List<Integer> trainDataId = SceneInfo.nearestNeighbors1(gridX, gridY, gridZ, position, direction, 1);
+            List<Integer> trainDataId = SceneInfo.nearestNeighbors2(gridX, gridY, gridZ, position, direction, 3);
             for(int i = 0; i < trainDataId.size(); i++) {
                 int id = trainDataId.get(i);
                 visibleObjList.addAll(trainResult.get(id).getVisibleObj());
             }
             collector.collect(new Result(dataId, Tools.removeDuplicateFromList(visibleObjList)));
-            System.out.println("dataId : " + dataId);
+//            System.out.println("dataId : " + dataId);
         }
     }
 

@@ -27,46 +27,25 @@ public class Main {
 
     public static void main(String[] args) throws Exception {
         long startTime = System.currentTimeMillis();
-        Configuration.getInstance().setIp("10.222.157.161");
+        Configuration.getInstance().setIp("127.0.0.1");
         Configuration.getInstance().setReadPort(6001);
         Configuration.getInstance().setWritePort(6002);
-        String[] trainDataPath = {"/home/pyn/Desktop/DataSet/GridData/gridData0.csv","/home/pyn/Desktop/DataSet/GridData/gridData1.csv",
-                "/home/pyn/Desktop/DataSet/GridData/gridData2.csv","/home/pyn/Desktop/DataSet/GridData/gridData3.csv",
-                "/home/pyn/Desktop/DataSet/GridData/gridData4.csv","/home/pyn/Desktop/DataSet/GridData/gridData5.csv",
-                "/home/pyn/Desktop/DataSet/GridData/gridData6.csv","/home/pyn/Desktop/DataSet/GridData/gridData7.csv",
-                "/home/pyn/Desktop/DataSet/GridData/gridData8.csv","/home/pyn/Desktop/DataSet/GridData/gridData9.csv"};
-//        String[] trainDataPath = {
-//                "E:\\DataSet\\GridData\\gridData0.csv","E:\\DataSet\\GridData\\gridData1.csv",
-//                "E:\\DataSet\\GridData\\gridData2.csv","E:\\DataSet\\GridData\\gridData3.csv",
-//                "E:\\DataSet\\GridData\\gridData4.csv","E:\\DataSet\\GridData\\gridData5.csv",
-//                "E:\\DataSet\\GridData\\gridData6.csv","E:\\DataSet\\GridData\\gridData7.csv",
-//                "E:\\DataSet\\GridData\\gridData8.csv","E:\\DataSet\\GridData\\gridData9.csv"
-//        };
-        String[] testDataPath = {"/home/pyn/Desktop/DataSet/test_data.csv"};
-//        String[] testDataPath = {
-//                "E:\\DataSet\\TestData\\test_data.csv",
-////                "E:\\DataSet\\TestData\\test_data_1.csv"
-//        };
+//        int trainLen = 38;
+//        String[] trainDataPath = new String[trainLen];
+//        for(int i = 0; i < trainLen; i++) {
+//            trainDataPath[i] = "E:\\DataSet\\GridData_5\\" + "gridData" + i + ".csv";
+//        }
+        String[] testDataPath = {
+                //"E:\\DataSet\\TestData\\test_data.csv",
+//                "E:\\DataSet\\TestData\\test_data_1.csv"
+        };
 
-        String[] trainTargetPath = {"/home/pyn/Desktop/DataSet/GridData/gridResult0.txt","/home/pyn/Desktop/DataSet/GridData/gridResult1.txt",
-                "/home/pyn/Desktop/DataSet/GridData/gridResult2.txt","/home/pyn/Desktop/DataSet/GridData/gridResult3.txt",
-                "/home/pyn/Desktop/DataSet/GridData/gridResult4.txt","/home/pyn/Desktop/DataSet/GridData/gridResult5.txt",
-                "/home/pyn/Desktop/DataSet/GridData/gridResult6.txt","/home/pyn/Desktop/DataSet/GridData/gridResult7.txt",
-                "/home/pyn/Desktop/DataSet/GridData/gridResult8.txt","/home/pyn/Desktop/DataSet/GridData/gridResult9.txt"};
-//        String[] trainTargetPath = {
-//                "E:\\DataSet\\GridData\\gridResult0.txt","E:\\DataSet\\GridData\\gridResult1.txt",
-//                "E:\\DataSet\\GridData\\gridResult2.txt","E:\\DataSet\\GridData\\gridResult3.txt",
-//                "E:\\DataSet\\GridData\\gridResult4.txt","E:\\DataSet\\GridData\\gridResult5.txt",
-//                "E:\\DataSet\\GridData\\gridResult6.txt","E:\\DataSet\\GridData\\gridResult7.txt",
-//                "E:\\DataSet\\GridData\\gridResult8.txt","E:\\DataSet\\GridData\\gridResult9.txt"
-//        };
-//        String[] testTargetPath = {"/home/pyn/Desktop/DataSet/grid_target_train.txt"};
-        String[] testTargetPath = {"/home/pyn/Desktop/DataSet/test_target.txt"};
-//        String[] testTargetPath = {
-//                "E:\\DataSet\\TestData\\test_target.txt",
-////                "E:\\DataSet\\TestData\\test_target_1.txt"
-//        };
-        Configuration.getInstance().setTrainDataPath(trainDataPath);
+        String[] trainTargetPath = {"E:\\DataSet\\GridData_10\\train_target.dat"};
+        String[] testTargetPath = {
+               // "E:\\DataSet\\TestData\\test_target.txt",
+//                "E:\\DataSet\\TestData\\test_target_1.txt"
+        };
+//        Configuration.getInstance().setTrainDataPath(trainDataPath);
         Configuration.getInstance().setTestDataPath(testDataPath);
         Configuration.getInstance().setTrainTargetPath(trainTargetPath);
         Configuration.getInstance().setTestTargetPath(testTargetPath);
@@ -82,14 +61,16 @@ public class Main {
         PrepareResult prepareResult = PrepareResult.getInstance(env);
         long prepareTime = System.currentTimeMillis();
         //将所有训练数据的结果存入到二进制文件中
-//        int objCnt = Tools.writeToBinary(prepareResult.getTrainResult(), "/home/pyn/Desktop/DataSet/train_target.dat");
+//        int objCnt = Tools.writeToBinary(prepareResult.getTrainResult(), "E:\\DataSet\\GridData_5\\train_target.dat");
 //        System.out.println("ObjCnt : " + objCnt);
+
         //        Configuration.getInstance().setKnnPositionk(48);
 //        Configuration.getInstance().setKnnDirectionk(2);
 //        www.pyn.tools.Tools.Configuration.getInstance().setReck(2);
 //        www.pyn.tools.Tools.Configuration.getInstance().setRecHowMany(3);
 //        www.pyn.tools.Tools.Configuration.getInstance().setCFHowMany(4);
-//        Knn knn = new Knn(params, env, prepareData, prepareResult);
+
+        Knn knn = new Knn(params, env, prepareData, prepareResult);
 //        Recommender recommender = new Recommender(params, env, prepareData, prepareResult);
 //        CollaborativeFiltering collaborativeFiltering = new CollaborativeFiltering(params, env, prepareData, prepareResult);
 
@@ -100,16 +81,16 @@ public class Main {
         //for(int k = 2; k <= 7; k += 1)
         {
             //www.pyn.tools.Tools.Configuration.getInstance().setKnnDirectionk(k);
-//            DataSet<Tuple3<Integer, Double, Double>> scores = knn.solveKnn();
+            //DataSet<Tuple3<Integer, Double, Double>> scores = knn.solveKnn();
 //            Tools.expandTrainSet(scores, prepareData.getTestData(), prepareResult.getTestResult(),5243);
 //            Tools.removeTestData(scores, prepareData.getTestData(), prepareResult.getTestResult());
 //            Tuple3<Integer, Double, Double> avg = www.pyn.tools.Tools.calScoresAvg(scores);
 //            avgs.add(avg);
         }
 
-        for(int i = 0; i < avgs.size(); i++) {
-            System.out.println(avgs.get(i).f0 + " " + avgs.get(i).f1 + " " + avgs.get(i).f2);
-        }
+//        for(int i = 0; i < avgs.size(); i++) {
+//            System.out.println(avgs.get(i).f0 + " " + avgs.get(i).f1 + " " + avgs.get(i).f2);
+//        }
 
         long endTime = System.currentTimeMillis();
         System.out.println("Prepare time: " + (prepareTime-startTime)*1.0/1000+"s");
@@ -121,60 +102,60 @@ public class Main {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         //与OcclusionCulling交互
-//        StreamExecutionEnvironment senv = StreamExecutionEnvironment.getExecutionEnvironment();
-//        String ip = Configuration.getInstance().getIp();
-//        int readPort = Configuration.getInstance().getReadPort();
-//        int writePort = Configuration.getInstance().getWritePort();
-//        DataStream<byte[]> bytes = senv.addSource(new SocketByteStreamFunction(ip, readPort, 18*4,0L));
-//
-//        DataStream<PrimitiveData> primitiveDataDataStream = bytes.flatMap(new FlatMapFunction<byte[], PrimitiveData>() {
-//            public void flatMap(byte[] bytes, Collector<PrimitiveData> collector) throws Exception {
-//                PrimitiveData primitiveData = PrimitiveData.primitiveDataFromBytes(bytes);
-//                collector.collect(primitiveData);
-//            }
-//        });
-//
-//        DataStream<Result> result = primitiveDataDataStream.flatMap(new Knn.knnMap());
-//
-//        result.writeToSocket(ip, writePort, new SerializationSchema<Result>() {
-//            public byte[] serialize(Result re) {
-//                int len = re.getVisibleObj().size()+1;
+        StreamExecutionEnvironment senv = StreamExecutionEnvironment.getExecutionEnvironment();
+        String ip = Configuration.getInstance().getIp();
+        int readPort = Configuration.getInstance().getReadPort();
+        int writePort = Configuration.getInstance().getWritePort();
+        DataStream<byte[]> bytes = senv.addSource(new SocketByteStreamFunction(ip, readPort, 18*4,0L));
+
+        DataStream<PrimitiveData> primitiveDataDataStream = bytes.flatMap(new FlatMapFunction<byte[], PrimitiveData>() {
+            public void flatMap(byte[] bytes, Collector<PrimitiveData> collector) throws Exception {
+                PrimitiveData primitiveData = PrimitiveData.primitiveDataFromBytes(bytes);
+                collector.collect(primitiveData);
+            }
+        });
+
+        DataStream<Result> result = primitiveDataDataStream.flatMap(new Knn.knnMap());
+        //本文实现了一个基于Flink流处理引擎对观察视点的可见物体进行推荐的服务器，开源项目OcclusionCulling提供可视化平台，相当于客户端。本系统基于Flink获取在OcclusionCulling的场景中随机游走时观察视点的相关流式数据，将推荐算法的思想应用到可见性问题中，基于这些数据对观察视点的可见物体对象集合进行实时推荐，将推荐结果以流数据的形式发送到OcclusionCulling进行渲染实现可视化。
+        result.writeToSocket(ip, writePort, new SerializationSchema<Result>() {
+            public byte[] serialize(Result re) {
+                int len = re.getVisibleObj().size()+1;
 //                System.out.println("len : " + len);
-//                byte[] buffer = new byte[(len+1)*4];
-//                generaterBuffer(buffer, 0, len);
-//                generaterBuffer(buffer, 1, re.getDataId());
-//                for(int i = 0; i < re.getVisibleObj().size(); i++) {
-//                    int tmp = re.getVisibleObj().get(i);
-//                    generaterBuffer(buffer, i+2, tmp);
+                byte[] buffer = new byte[(len+1)*4];
+                generaterBuffer(buffer, 0, len);
+                generaterBuffer(buffer, 1, re.getDataId());
+                for(int i = 0; i < re.getVisibleObj().size(); i++) {
+                    int tmp = re.getVisibleObj().get(i);
+                    generaterBuffer(buffer, i+2, tmp);
+                }
+//                File file = new File("/home/pyn/Desktop/out.txt");
+//                FileOutputStream in;
+//                try {
+//                    in = new FileOutputStream(file);
+//                    String start = "start ";
+//                    in.write(start.getBytes());
+//                    for(int i = 0; i < re.getVisibleObj().size(); i++) {
+//                        int tmp = re.getVisibleObj().get(i);
+//                        byte[] bt = String.valueOf(tmp).concat(", ").getBytes();
+//                        in.write(bt, 0 ,bt.length);
+//                        generaterBuffer(buffer, i+2, tmp);
+//                    }
+//                    in.close();
+//                } catch (FileNotFoundException e) {
+//                    e.printStackTrace();
+//                } catch (IOException e) {
+//                    e.printStackTrace();
 //                }
-////                File file = new File("/home/pyn/Desktop/out.txt");
-////                FileOutputStream in;
-////                try {
-////                    in = new FileOutputStream(file);
-////                    String start = "start ";
-////                    in.write(start.getBytes());
-////                    for(int i = 0; i < re.getVisibleObj().size(); i++) {
-////                        int tmp = re.getVisibleObj().get(i);
-////                        byte[] bt = String.valueOf(tmp).concat(", ").getBytes();
-////                        in.write(bt, 0 ,bt.length);
-////                        generaterBuffer(buffer, i+2, tmp);
-////                    }
-////                    in.close();
-////                } catch (FileNotFoundException e) {
-////                    e.printStackTrace();
-////                } catch (IOException e) {
-////                    e.printStackTrace();
-////                }
-//
-////                byte[] buffer = new byte[4*3];
-////                generaterBuffer(buffer, 0, 2);
-////                generaterBuffer(buffer, 1, 0);
-////                generaterBuffer(buffer, 2, 1);
-//
-//                return buffer;
-//            }
-//        });
-//        senv.execute("test");
+
+//                byte[] buffer = new byte[4*3];
+//                generaterBuffer(buffer, 0, 2);
+//                generaterBuffer(buffer, 1, 0);
+//                generaterBuffer(buffer, 2, 1);
+
+                return buffer;
+            }
+        });
+        senv.execute("test");
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 

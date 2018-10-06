@@ -13,6 +13,11 @@ public class Vector3 {
         this.z = z;
     }
 
+    public double[] getArray() {
+        double[] d = {x, y, z};
+        return d;
+    }
+
     public Vector3 normalize() {
         double len = Math.sqrt(x*x + y*y + z*z);
         return new Vector3(x/len, y/len, z/len);

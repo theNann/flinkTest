@@ -36,7 +36,11 @@ public class PrepareData {
     private String[] testFilePath;
     private static PrepareData prepareData = null;
 
-    private PrepareData(ExecutionEnvironment env) {
+    private PrepareData() {
+
+    }
+
+    public void Init(ExecutionEnvironment env) {
         this.env = env;
         this.trainFilePath = Configuration.getInstance().getTrainDataPath();
         this.testFilePath = Configuration.getInstance().getTestDataPath();
@@ -52,15 +56,14 @@ public class PrepareData {
                 }
             }
         }
-        readTrainPosition();
-        readTrainDirection();
         readTrainMapData();
         readTestData();
     }
 
     public static PrepareData getInstance(ExecutionEnvironment env) {
         if (prepareData == null) {
-            prepareData = new PrepareData(env);
+            prepareData = new PrepareData();
+            prepareData.Init(env);
         } else {
             return prepareData;
         }
@@ -68,25 +71,28 @@ public class PrepareData {
     }
 
     private void readTrainMapData() {
-        trainMapData.clear();
-        for(int idx = 0; idx < trainFilePath.length; idx++) {
-            DataSet<PrimitiveData> trainMapDataSet = env.readCsvFile(trainFilePath[idx])
-                    .includeFields("1111111000")
-                    .pojoType(PrimitiveData.class, "dataId", "px", "py", "pz", "dx", "dy", "dz");
-            try {
-                List<PrimitiveData> list = trainMapDataSet.collect();
-                for (int i = 0; i < list.size(); i++) {
-                    int dataId = list.get(i).getDataId();
-                    PrimitiveData primitiveData = list.get(i);
-                    trainMapData.put(dataId, primitiveData);
-                    trainData[SceneInfo.ToGridX(primitiveData.px)]
-                            [SceneInfo.ToGridY(primitiveData.py)]
-                            [SceneInfo.ToGridZ(primitiveData.pz)].primitives.add(primitiveData);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
+//        trainMapData.clear();
+//        if(trainFilePath == null || trainFilePath.length == 0) {
+//            return;
+//        }
+//        for(int idx = 0; idx < trainFilePath.length; idx++) {
+//            DataSet<PrimitiveData> trainMapDataSet = env.readCsvFile(trainFilePath[idx])
+//                    .includeFields("1111111000")
+//                    .pojoType(PrimitiveData.class, "dataId", "px", "py", "pz", "dx", "dy", "dz");
+//            try {
+//                List<PrimitiveData> list = trainMapDataSet.collect();
+//                for (int i = 0; i < list.size(); i++) {
+//                    int dataId = list.get(i).getDataId();
+//                    PrimitiveData primitiveData = list.get(i);
+//                    trainMapData.put(dataId, primitiveData);
+//                    trainData[SceneInfo.ToGridX(primitiveData.px)]
+//                            [SceneInfo.ToGridY(primitiveData.py)]
+//                            [SceneInfo.ToGridZ(primitiveData.pz)].primitives.add(primitiveData);
+//                }
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
+//        }
 //        for (Map.Entry<Integer, PrimitiveData> entry : trainMapData.entrySet()) {
 //            trainData[SceneInfo.ToGridX(entry.getValue().px)]
 //                    [SceneInfo.ToGridY(entry.getValue().py)]
@@ -97,6 +103,9 @@ public class PrepareData {
     public void readTestData() {
 //        System.out.println("PrepareData_readTestPosition!");
         testData.clear();
+        if(testFilePath == null || testFilePath.length == 0) {
+            return;
+        }
         for(int idx = 0; idx < testFilePath.length; idx += 1) {
             this.testDataDS = env.readCsvFile(testFilePath[idx])
                     .includeFields("1111111000")
