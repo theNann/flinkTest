@@ -29,7 +29,7 @@ public class PrepareData {
 //    private HashMap<Integer, Position> trainPosition;
 //    private HashMap<Integer, Direction> trainDirection;
     private HashMap<Integer, PrimitiveData> trainMapData;
-    private GridData[][][] trainData;
+//    private GridData[][][] trainData;
     private DataSet<PrimitiveData> testDataDS;
     private HashMap<Integer, PrimitiveData> testData;
     private String[] trainFilePath;
@@ -48,14 +48,14 @@ public class PrepareData {
 //        trainDirection = new HashMap<Integer, Direction>();
         trainMapData = new HashMap<Integer, PrimitiveData>();
         testData = new HashMap<Integer, PrimitiveData>();
-        trainData = new GridData[SceneInfo.xGridNumber][SceneInfo.yGridNumber][SceneInfo.zGridNumber];
-        for (int i = 0; i < SceneInfo.xGridNumber; i++) {
-            for (int j = 0; j < SceneInfo.yGridNumber; j++) {
-                for (int k = 0; k < SceneInfo.zGridNumber; k++) {
-                    trainData[i][j][k] = new GridData();
-                }
-            }
-        }
+//        trainData = new GridData[SceneInfo.xGridNumber][SceneInfo.yGridNumber][SceneInfo.zGridNumber];
+//        for (int i = 0; i < SceneInfo.xGridNumber; i++) {
+//            for (int j = 0; j < SceneInfo.yGridNumber; j++) {
+//                for (int k = 0; k < SceneInfo.zGridNumber; k++) {
+//                    trainData[i][j][k] = new GridData();
+//                }
+//            }
+//        }
         readTrainMapData();
         readTestData();
     }
@@ -71,28 +71,28 @@ public class PrepareData {
     }
 
     private void readTrainMapData() {
-//        trainMapData.clear();
-//        if(trainFilePath == null || trainFilePath.length == 0) {
-//            return;
-//        }
-//        for(int idx = 0; idx < trainFilePath.length; idx++) {
-//            DataSet<PrimitiveData> trainMapDataSet = env.readCsvFile(trainFilePath[idx])
-//                    .includeFields("1111111000")
-//                    .pojoType(PrimitiveData.class, "dataId", "px", "py", "pz", "dx", "dy", "dz");
-//            try {
-//                List<PrimitiveData> list = trainMapDataSet.collect();
-//                for (int i = 0; i < list.size(); i++) {
-//                    int dataId = list.get(i).getDataId();
-//                    PrimitiveData primitiveData = list.get(i);
-//                    trainMapData.put(dataId, primitiveData);
+        trainMapData.clear();
+        if(trainFilePath == null || trainFilePath.length == 0) {
+            return;
+        }
+        for(int idx = 0; idx < trainFilePath.length; idx++) {
+            DataSet<PrimitiveData> trainMapDataSet = env.readCsvFile(trainFilePath[idx])
+                    .includeFields("1111111000")
+                    .pojoType(PrimitiveData.class, "dataId", "px", "py", "pz", "dx", "dy", "dz");
+            try {
+                List<PrimitiveData> list = trainMapDataSet.collect();
+                for (int i = 0; i < list.size(); i++) {
+                    int dataId = list.get(i).getDataId();
+                    PrimitiveData primitiveData = list.get(i);
+                    trainMapData.put(dataId, primitiveData);
 //                    trainData[SceneInfo.ToGridX(primitiveData.px)]
 //                            [SceneInfo.ToGridY(primitiveData.py)]
 //                            [SceneInfo.ToGridZ(primitiveData.pz)].primitives.add(primitiveData);
-//                }
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }
-//        }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
 //        for (Map.Entry<Integer, PrimitiveData> entry : trainMapData.entrySet()) {
 //            trainData[SceneInfo.ToGridX(entry.getValue().px)]
 //                    [SceneInfo.ToGridY(entry.getValue().py)]
@@ -140,9 +140,9 @@ public class PrepareData {
         return trainMapData;
     }
 
-    public GridData[][][] getTrainData() {
-        return trainData;
-    }
+//    public GridData[][][] getTrainData() {
+//        return trainData;
+//    }
 
     public void readTrainPosition() {
 //        DataSet<Position> trainPositionDataSet = env.readCsvFile(trainFilePath)

@@ -35,21 +35,32 @@ public class Main {
 //        for(int i = 0; i < trainLen; i++) {
 //            trainDataPath[i] = "E:\\DataSet\\GridData_5\\" + "gridData" + i + ".csv";
 //        }
+        String[] trainDataPath = {
+//                "/home/pyn/Desktop/DataSet/data_train.csv"
+                "/home/pyn/Desktop/DataSet/NewData/data0.csv"
+        };
         String[] testDataPath = {
+                "/home/pyn/Desktop/DataSet/NewData/data0.csv",
+              //  "/home/pyn/Desktop/DataSet/NewData/data1.csv", 该csv的dataid需要接着上一个
                 //"E:\\DataSet\\TestData\\test_data.csv",
 //                "E:\\DataSet\\TestData\\test_data_1.csv"
         };
 
-        String[] trainTargetPath = {"E:\\DataSet\\GridData_10\\train_target.dat"};
+        String[] trainTargetPath = {
+//                "/home/pyn/Desktop/DataSet/target_train.txt"
+                "/home/pyn/Desktop/DataSet/NewData/target0.txt",
+        };
         String[] testTargetPath = {
                // "E:\\DataSet\\TestData\\test_target.txt",
 //                "E:\\DataSet\\TestData\\test_target_1.txt"
+                "/home/pyn/Desktop/DataSet/NewData/target0.txt",
+               // "/home/pyn/Desktop/DataSet/NewData/target1.txt",
         };
-//        Configuration.getInstance().setTrainDataPath(trainDataPath);
+        Configuration.getInstance().setTrainDataPath(trainDataPath);
         Configuration.getInstance().setTestDataPath(testDataPath);
         Configuration.getInstance().setTrainTargetPath(trainTargetPath);
         Configuration.getInstance().setTestTargetPath(testTargetPath);
-        Configuration.getInstance().setKnnWriteToFile("E:\\DataSet\\knnScore.csv");
+        Configuration.getInstance().setKnnWriteToFile("/home/pyn/Desktop/DataSet/knnScore.csv");
 
         ExecutionEnvironment env;
         ParameterTool params;
@@ -78,10 +89,10 @@ public class Main {
 
 //        DataSet<Tuple3<Integer, Double, Double>> scores = collaborativeFiltering.solveCollaborativeFiltering();
 //        recommender.solveRecommender();
-        //for(int k = 2; k <= 7; k += 1)
+        for(int k = 3; k <= 3; k += 2)
         {
-            //www.pyn.tools.Tools.Configuration.getInstance().setKnnDirectionk(k);
-            //DataSet<Tuple3<Integer, Double, Double>> scores = knn.solveKnn();
+            Configuration.getInstance().setKnnPositionk(k);
+            DataSet<Tuple3<Integer, Double, Double>> scores = knn.solveKnn();
 //            Tools.expandTrainSet(scores, prepareData.getTestData(), prepareResult.getTestResult(),5243);
 //            Tools.removeTestData(scores, prepareData.getTestData(), prepareResult.getTestResult());
 //            Tuple3<Integer, Double, Double> avg = www.pyn.tools.Tools.calScoresAvg(scores);
@@ -97,65 +108,65 @@ public class Main {
         System.out.println("Cal time: " + (endTime-prepareTime)*1.0/1000 + "s ,Data size: " + prepareData.getTestData().size());
         System.out.println("train: data, result " + prepareData.getTrainMapData().size()+ " " +prepareResult.getTrainResult().size()); //72000
         System.out.println("test: data, result " + prepareData.getTestData().size()+ " " + prepareResult.getTestResult().size()); //5809, time:3.359s
-        System.out.println("grid size : " + prepareData.getTrainData().length + " " +prepareData.getTrainData()[0].length + " " + prepareData.getTrainData()[0][0].length);
+       // System.out.println("grid size : " + prepareData.getTrainData().length + " " +prepareData.getTrainData()[0].length + " " + prepareData.getTrainData()[0][0].length);
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         //与OcclusionCulling交互
-        StreamExecutionEnvironment senv = StreamExecutionEnvironment.getExecutionEnvironment();
-        String ip = Configuration.getInstance().getIp();
-        int readPort = Configuration.getInstance().getReadPort();
-        int writePort = Configuration.getInstance().getWritePort();
-        DataStream<byte[]> bytes = senv.addSource(new SocketByteStreamFunction(ip, readPort, 18*4,0L));
-
-        DataStream<PrimitiveData> primitiveDataDataStream = bytes.flatMap(new FlatMapFunction<byte[], PrimitiveData>() {
-            public void flatMap(byte[] bytes, Collector<PrimitiveData> collector) throws Exception {
-                PrimitiveData primitiveData = PrimitiveData.primitiveDataFromBytes(bytes);
-                collector.collect(primitiveData);
-            }
-        });
-
-        DataStream<Result> result = primitiveDataDataStream.flatMap(new Knn.knnMap());
-        //本文实现了一个基于Flink流处理引擎对观察视点的可见物体进行推荐的服务器，开源项目OcclusionCulling提供可视化平台，相当于客户端。本系统基于Flink获取在OcclusionCulling的场景中随机游走时观察视点的相关流式数据，将推荐算法的思想应用到可见性问题中，基于这些数据对观察视点的可见物体对象集合进行实时推荐，将推荐结果以流数据的形式发送到OcclusionCulling进行渲染实现可视化。
-        result.writeToSocket(ip, writePort, new SerializationSchema<Result>() {
-            public byte[] serialize(Result re) {
-                int len = re.getVisibleObj().size()+1;
-//                System.out.println("len : " + len);
-                byte[] buffer = new byte[(len+1)*4];
-                generaterBuffer(buffer, 0, len);
-                generaterBuffer(buffer, 1, re.getDataId());
-                for(int i = 0; i < re.getVisibleObj().size(); i++) {
-                    int tmp = re.getVisibleObj().get(i);
-                    generaterBuffer(buffer, i+2, tmp);
-                }
-//                File file = new File("/home/pyn/Desktop/out.txt");
-//                FileOutputStream in;
-//                try {
-//                    in = new FileOutputStream(file);
-//                    String start = "start ";
-//                    in.write(start.getBytes());
-//                    for(int i = 0; i < re.getVisibleObj().size(); i++) {
-//                        int tmp = re.getVisibleObj().get(i);
-//                        byte[] bt = String.valueOf(tmp).concat(", ").getBytes();
-//                        in.write(bt, 0 ,bt.length);
-//                        generaterBuffer(buffer, i+2, tmp);
-//                    }
-//                    in.close();
-//                } catch (FileNotFoundException e) {
-//                    e.printStackTrace();
-//                } catch (IOException e) {
-//                    e.printStackTrace();
+//        StreamExecutionEnvironment senv = StreamExecutionEnvironment.getExecutionEnvironment();
+//        String ip = Configuration.getInstance().getIp();
+//        int readPort = Configuration.getInstance().getReadPort();
+//        int writePort = Configuration.getInstance().getWritePort();
+//        DataStream<byte[]> bytes = senv.addSource(new SocketByteStreamFunction(ip, readPort, 18*4,0L));
+//
+//        DataStream<PrimitiveData> primitiveDataDataStream = bytes.flatMap(new FlatMapFunction<byte[], PrimitiveData>() {
+//            public void flatMap(byte[] bytes, Collector<PrimitiveData> collector) throws Exception {
+//                PrimitiveData primitiveData = PrimitiveData.primitiveDataFromBytes(bytes);
+//                collector.collect(primitiveData);
+//            }
+//        });
+//
+//        DataStream<Result> result = primitiveDataDataStream.flatMap(new Knn.knnMap());
+//        //本文实现了一个基于Flink流处理引擎对观察视点的可见物体进行推荐的服务器，开源项目OcclusionCulling提供可视化平台，相当于客户端。本系统基于Flink获取在OcclusionCulling的场景中随机游走时观察视点的相关流式数据，将推荐算法的思想应用到可见性问题中，基于这些数据对观察视点的可见物体对象集合进行实时推荐，将推荐结果以流数据的形式发送到OcclusionCulling进行渲染实现可视化。
+//        result.writeToSocket(ip, writePort, new SerializationSchema<Result>() {
+//            public byte[] serialize(Result re) {
+//                int len = re.getVisibleObj().size()+1;
+////                System.out.println("len : " + len);
+//                byte[] buffer = new byte[(len+1)*4];
+//                generaterBuffer(buffer, 0, len);
+//                generaterBuffer(buffer, 1, re.getDataId());
+//                for(int i = 0; i < re.getVisibleObj().size(); i++) {
+//                    int tmp = re.getVisibleObj().get(i);
+//                    generaterBuffer(buffer, i+2, tmp);
 //                }
-
-//                byte[] buffer = new byte[4*3];
-//                generaterBuffer(buffer, 0, 2);
-//                generaterBuffer(buffer, 1, 0);
-//                generaterBuffer(buffer, 2, 1);
-
-                return buffer;
-            }
-        });
-        senv.execute("test");
+////                File file = new File("/home/pyn/Desktop/out.txt");
+////                FileOutputStream in;
+////                try {
+////                    in = new FileOutputStream(file);
+////                    String start = "start ";
+////                    in.write(start.getBytes());
+////                    for(int i = 0; i < re.getVisibleObj().size(); i++) {
+////                        int tmp = re.getVisibleObj().get(i);
+////                        byte[] bt = String.valueOf(tmp).concat(", ").getBytes();
+////                        in.write(bt, 0 ,bt.length);
+////                        generaterBuffer(buffer, i+2, tmp);
+////                    }
+////                    in.close();
+////                } catch (FileNotFoundException e) {
+////                    e.printStackTrace();
+////                } catch (IOException e) {
+////                    e.printStackTrace();
+////                }
+//
+////                byte[] buffer = new byte[4*3];
+////                generaterBuffer(buffer, 0, 2);
+////                generaterBuffer(buffer, 1, 0);
+////                generaterBuffer(buffer, 2, 1);
+//
+//                return buffer;
+//            }
+//        });
+//        senv.execute("test");
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 

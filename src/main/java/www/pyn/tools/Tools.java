@@ -3,8 +3,6 @@ package www.pyn.tools;
 import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.flink.api.java.DataSet;
 import org.apache.flink.api.java.tuple.Tuple3;
-import org.omg.CORBA.INTERNAL;
-import scala.Int;
 import www.pyn.bean.*;
 
 import java.io.*;
@@ -110,9 +108,8 @@ public class Tools {
         return list;
     }
 
-    public static List<SimilarityTuple> getNearestNeighbors(HashMap<Integer, Position> trainPosition, Position position,
-                           int minK, int considerDirectiton, int maxK, HashMap<Integer, Direction>trainDirection,
-                                                        Direction direction) {
+    public static List<SimilarityTuple> getNearestNeighbors(HashMap<Integer, PrimitiveData> trainData, Position position
+            , Direction direction, int considerDirectiton, int minK, int maxK) {
         int kk;
         if(considerDirectiton == 1) {
             kk = maxK;
@@ -120,9 +117,10 @@ public class Tools {
             kk = minK;
         }
         MinHeap minHeap = new MinHeap(kk);
-        for(Map.Entry<Integer,Position> entry : trainPosition.entrySet()) {
+        for(Map.Entry<Integer,PrimitiveData> entry : trainData.entrySet()) {
             int dataId = entry.getKey();
-            double sim = Tools.euclideanDistanceSim(entry.getValue().getPosition(), position.getPosition());
+            Position trainPosition = entry.getValue().getPosition();
+            double sim = Tools.euclideanDistanceSim(trainPosition.getPosition(), position.getPosition());
             if(minHeap.getCount() < kk) {
                 minHeap.add(new SimilarityTuple(dataId, sim));
                 if(minHeap.getCount() == kk) {
@@ -152,7 +150,7 @@ public class Tools {
             for(int i = 0; i < minHeap.arr.length; i++) {
                 int dataId = minHeap.arr[i].dataId;
                 double simP = minHeap.arr[i].similarityP;
-                double simD = Tools.vectorSimlarity(trainDirection.get(dataId).getDirection(), direction.getDirection());
+                double simD = Tools.vectorSimlarity(trainData.get(dataId).getDirection().getDirection(), direction.getDirection());
                 similarityTuplesNew.add(new SimilarityTuple(dataId, simP, simD));
                 if(maxSimp < simP) {
                     maxSimp = simP;

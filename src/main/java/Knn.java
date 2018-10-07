@@ -20,13 +20,13 @@ import java.util.List;
 public class Knn {
 //    private static HashMap<Integer, Position> trainPosition;
 //    private static HashMap<Integer, Direction> trainDirection;
-    private static GridData[][][] trainData;
-    private DataSet<PrimitiveData> testDataDS;
-    private HashMap<Integer, PrimitiveData> testData;
 
+    private DataSet<PrimitiveData> testDataDS;
+
+    private static HashMap<Integer, PrimitiveData> testData;
+    private static HashMap<Integer, PrimitiveData> trainData;
     private static HashMap<Integer,Result> trainResult;
     private static HashMap<Integer,Result> testResult;
-
 
     private ExecutionEnvironment env;
     private ParameterTool params;
@@ -38,10 +38,9 @@ public class Knn {
 
 //        trainPosition = prepareData.getTrainPosition();
 //        trainDirection = prepareData.getTrainDirection();
-        trainData = prepareData.getTrainData();
+        trainData = prepareData.getTrainMapData();
         testDataDS = prepareData.getTestDataDS();
         testData = prepareData.getTestData();
-
         trainResult = prepareResult.getTrainResult();
         testResult = prepareResult.getTestResult();
     }
@@ -109,28 +108,32 @@ public class Knn {
            // System.out.println("testDataId : " + dataId);
             List<Integer> visibleObjList = new ArrayList<Integer>();
             visibleObjList.clear();
-//            int positionK = www.pyn.tools.Tools.Configuration.getInstance().getKnnPositionk();
-//            int directionK = www.pyn.tools.Tools.Configuration.getInstance().getKnnDirectionk();
-//            List<SimilarityTuple> kNearestNeighbors = www.pyn.tools.Tools.getNearestNeighbors(trainPosition, position, directionK,
-//                    1, positionK, trainDirection, direction);
-//
-//            for(int i = 0; i < kNearestNeighbors.size(); i++) {
-//                int simId = kNearestNeighbors.get(i).dataId;
-////                System.out.println(dataId + " " + simId + " " + kNearestNeighbors[i].simlarity);
-//                Result rs = trainResult.get(simId);
-//                visibleObjList.addAll(rs.getVisibleObj());
-//            }
-            int gridX = SceneInfo.ToGridX(position.getPx());
-            int gridY = SceneInfo.ToGridY(position.getPy());
-            int gridZ = SceneInfo.ToGridZ(position.getPz());
-//            List<GridData> neighbors7 = SceneInfo.nearestNeighbors7(gridX, gridY, gridZ, trainData);
-//            List<GridData> neighbors2 = SceneInfo.nearestNeighbors2(gridX, gridY, gridZ, position, trainData);
-            //List<Integer> trainDataId = SceneInfo.nearestNeighbors1(gridX, gridY, gridZ, position, direction, 1);
-            List<Integer> trainDataId = SceneInfo.nearestNeighbors2(gridX, gridY, gridZ, position, direction, 3);
-            for(int i = 0; i < trainDataId.size(); i++) {
-                int id = trainDataId.get(i);
-                visibleObjList.addAll(trainResult.get(id).getVisibleObj());
+            int positionK = Configuration.getInstance().getKnnPositionk();
+            int directionK = Configuration.getInstance().getKnnDirectionk();
+            List<SimilarityTuple> kNearestNeighbors = Tools.getNearestNeighbors(trainData, position, direction,
+                     0, positionK, 0);
+
+            for(int i = 0; i < kNearestNeighbors.size(); i++) {
+                int simId = kNearestNeighbors.get(i).dataId;
+//                System.out.println(dataId + " " + simId + " " + kNearestNeighbors[i].simlarity);
+                Result rs = trainResult.get(simId);
+                visibleObjList.addAll(rs.getVisibleObj());
             }
+
+            //优化后
+//            int gridX = SceneInfo.ToGridX(position.getPx());
+//            int gridY = SceneInfo.ToGridY(position.getPy());
+//            int gridZ = SceneInfo.ToGridZ(position.getPz());
+////            List<GridData> neighbors7 = SceneInfo.nearestNeighbors7(gridX, gridY, gridZ, trainData);
+////            List<GridData> neighbors2 = SceneInfo.nearestNeighbors2(gridX, gridY, gridZ, position, trainData);
+//            //List<Integer> trainDataId = SceneInfo.nearestNeighbors1(gridX, gridY, gridZ, position, direction, 1);
+//            List<Integer> trainDataId = SceneInfo.nearestNeighbors2(gridX, gridY, gridZ, position, direction, 3);
+//            for(int i = 0; i < trainDataId.size(); i++) {
+//                int id = trainDataId.get(i);
+//                visibleObjList.addAll(trainResult.get(id).getVisibleObj());
+//            }
+            //优化后
+
             collector.collect(new Result(dataId, Tools.removeDuplicateFromList(visibleObjList)));
 //            System.out.println("dataId : " + dataId);
         }
