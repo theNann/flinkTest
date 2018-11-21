@@ -360,7 +360,7 @@ public class Tools {
         try {
             scoresList = scores.collect();
             for(int i = 0; i < scoresList.size(); i++) {
-                if(scoresList.get(i).f1 < 0.7 || scoresList.get(i).f2 < 0.7) {
+                if(scoresList.get(i).f1 < 0.5 || scoresList.get(i).f2 < 0.5) {
                     removeDataId.add(scoresList.get(i).f0);
                 }
             }
@@ -380,8 +380,8 @@ public class Tools {
         for(Map.Entry<Integer, Result> entry : testResult.entrySet()) {
             testResultList.add(entry.getValue());
         }
-        writeCSV2(testDataList, "/home/pyn/Desktop/DataSet/test_data.csv", 0);
-        writeTxt2(testResultList, "/home/pyn/Desktop/DataSet/test_target.txt", 0);
+        writeCSV2(testDataList, "/home/pyn/Desktop/DataSet/NewData/test_data_hhhh_2.csv", 0);
+        writeTxt2(testResultList, "/home/pyn/Desktop/DataSet/NewData/test_target_hhhh_2.txt", 0);
     }
 
     public static List<Integer> removeDuplicateFromList(List<Integer> list) {

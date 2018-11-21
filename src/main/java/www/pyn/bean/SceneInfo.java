@@ -22,7 +22,7 @@ public class SceneInfo {
     public static double positionZmin = -70;
     public static double positionZmax = 130;
 
-    public static double gridLength = 10;
+    public static double gridLength = 20;
     public static int forwardsNum = 60;
     public static Vector3[] forwards = {
             new Vector3(0, 0, 1),

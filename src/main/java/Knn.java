@@ -69,8 +69,8 @@ public class Knn {
 //        System.out.println("testData size : " + testData.size());
 //        www.pyn.tools.Tools.expandTrainSet(scores, testData, testResult, 13674);
 
-        scores.writeAsCsv(Configuration.getInstance().getKnnWriteToFile(),"\n",",", FileSystem.WriteMode.OVERWRITE)
-                .setParallelism(1);
+//        scores.writeAsCsv(Configuration.getInstance().getKnnWriteToFile(),"\n",",", FileSystem.WriteMode.OVERWRITE)
+//                .setParallelism(1);
 
         try {
             env.execute("FlinkScores");
@@ -107,34 +107,43 @@ public class Knn {
             Direction direction = primitiveData.getDirection();
            // System.out.println("testDataId : " + dataId);
             List<Integer> visibleObjList = new ArrayList<Integer>();
+            Set<Integer> visibleObjectSet = new HashSet<>();
             visibleObjList.clear();
-            int positionK = Configuration.getInstance().getKnnPositionk();
-            int directionK = Configuration.getInstance().getKnnDirectionk();
-            List<SimilarityTuple> kNearestNeighbors = Tools.getNearestNeighbors(trainData, position, direction,
-                     0, positionK, 0);
-
-            for(int i = 0; i < kNearestNeighbors.size(); i++) {
-                int simId = kNearestNeighbors.get(i).dataId;
-//                System.out.println(dataId + " " + simId + " " + kNearestNeighbors[i].simlarity);
-                Result rs = trainResult.get(simId);
-                visibleObjList.addAll(rs.getVisibleObj());
-            }
+//            int positionK = Configuration.getInstance().getKnnPositionk();
+//            int directionK = Configuration.getInstance().getKnnDirectionk();
+//            List<SimilarityTuple> kNearestNeighbors = Tools.getNearestNeighbors(trainData, position, direction,
+//                     1, directionK, 15);
+//
+//            for(int i = 0; i < kNearestNeighbors.size(); i++) {
+//                int simId = kNearestNeighbors.get(i).dataId;
+////                System.out.println(dataId + " " + simId + " " + kNearestNeighbors[i].simlarity);
+//                Result rs = trainResult.get(simId);
+//                //并集
+//                visibleObjList.addAll(rs.getVisibleObj());
+//                //交集
+////                if(visibleObjectSet.size() == 0) {
+////                    visibleObjectSet.addAll(rs.getVisibleObj());
+////                } else {
+////                    visibleObjectSet.retainAll(rs.getVisibleObj());
+////                }
+//            }
 
             //优化后
-//            int gridX = SceneInfo.ToGridX(position.getPx());
-//            int gridY = SceneInfo.ToGridY(position.getPy());
-//            int gridZ = SceneInfo.ToGridZ(position.getPz());
-////            List<GridData> neighbors7 = SceneInfo.nearestNeighbors7(gridX, gridY, gridZ, trainData);
-////            List<GridData> neighbors2 = SceneInfo.nearestNeighbors2(gridX, gridY, gridZ, position, trainData);
-//            //List<Integer> trainDataId = SceneInfo.nearestNeighbors1(gridX, gridY, gridZ, position, direction, 1);
+            int gridX = SceneInfo.ToGridX(position.getPx());
+            int gridY = SceneInfo.ToGridY(position.getPy());
+            int gridZ = SceneInfo.ToGridZ(position.getPz());
+//            List<GridData> neighbors7 = SceneInfo.nearestNeighbors7(gridX, gridY, gridZ, trainData);
+//            List<GridData> neighbors2 = SceneInfo.nearestNeighbors2(gridX, gridY, gridZ, position, trainData);
+            List<Integer> trainDataId = SceneInfo.nearestNeighbors1(gridX, gridY, gridZ, position, direction, 2);
 //            List<Integer> trainDataId = SceneInfo.nearestNeighbors2(gridX, gridY, gridZ, position, direction, 3);
-//            for(int i = 0; i < trainDataId.size(); i++) {
-//                int id = trainDataId.get(i);
-//                visibleObjList.addAll(trainResult.get(id).getVisibleObj());
-//            }
+            for(int i = 0; i < trainDataId.size(); i++) {
+                int id = trainDataId.get(i);
+                visibleObjList.addAll(trainResult.get(id).getVisibleObj());
+            }
             //优化后
 
             collector.collect(new Result(dataId, Tools.removeDuplicateFromList(visibleObjList)));
+//            collector.collect(new Result(dataId, new ArrayList<>(visibleObjectSet)));
 //            System.out.println("dataId : " + dataId);
         }
     }

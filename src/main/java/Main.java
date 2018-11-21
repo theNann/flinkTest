@@ -36,25 +36,31 @@ public class Main {
 //            trainDataPath[i] = "E:\\DataSet\\GridData_5\\" + "gridData" + i + ".csv";
 //        }
         String[] trainDataPath = {
-//                "/home/pyn/Desktop/DataSet/data_train.csv"
-                "/home/pyn/Desktop/DataSet/NewData/data0.csv"
+//                "/home/pyn/Desktop/DataSet/train_random/random.csv",
+//                "/home/pyn/Desktop/DataSet/train_random/data_train_all/data_train_0.csv",
+//                "/home/pyn/Desktop/DataSet/train_random/data_train_all/data_train_1.csv",
+//                "/home/pyn/Desktop/DataSet/train_random/data_train_1.csv"
         };
         String[] testDataPath = {
-                "/home/pyn/Desktop/DataSet/NewData/data0.csv",
-              //  "/home/pyn/Desktop/DataSet/NewData/data1.csv", 该csv的dataid需要接着上一个
+                "/home/pyn/Desktop/DataSet/NewData/test_data_last.csv",
+//                "/home/pyn/Desktop/DataSet/NewData/data0.csv",
+//                "/home/pyn/Desktop/DataSet/NewData/data1.csv",//该csv的dataid需要接着上一个
                 //"E:\\DataSet\\TestData\\test_data.csv",
 //                "E:\\DataSet\\TestData\\test_data_1.csv"
         };
 
         String[] trainTargetPath = {
-//                "/home/pyn/Desktop/DataSet/target_train.txt"
-                "/home/pyn/Desktop/DataSet/NewData/target0.txt",
+                "/home/pyn/Desktop/DataSet/GridData_20/train_target.dat",
+//                "/home/pyn/Desktop/DataSet/train_random/random.txt",
+//                "/home/pyn/Desktop/DataSet/train_random/target_train_1.txt"
         };
         String[] testTargetPath = {
                // "E:\\DataSet\\TestData\\test_target.txt",
 //                "E:\\DataSet\\TestData\\test_target_1.txt"
-                "/home/pyn/Desktop/DataSet/NewData/target0.txt",
-               // "/home/pyn/Desktop/DataSet/NewData/target1.txt",
+                "/home/pyn/Desktop/DataSet/NewData/test_target_last.txt",
+//                "/home/pyn/Desktop/DataSet/NewData/target0.txt",
+//                "/home/pyn/Desktop/DataSet/NewData/target1.txt",
+//                "/home/pyn/Desktop/DataSet/NewData/target1.txt",
         };
         Configuration.getInstance().setTrainDataPath(trainDataPath);
         Configuration.getInstance().setTestDataPath(testDataPath);
@@ -89,19 +95,23 @@ public class Main {
 
 //        DataSet<Tuple3<Integer, Double, Double>> scores = collaborativeFiltering.solveCollaborativeFiltering();
 //        recommender.solveRecommender();
-        for(int k = 3; k <= 3; k += 2)
-        {
-            Configuration.getInstance().setKnnPositionk(k);
+      //  for(int k = 7; k <= 7; k += 2)
+     //   {
+//            Configuration.getInstance().setReck(1);
+//            Configuration.getInstance().setRecHowMany(k);
+//            recommender.solveRecommender();
+//            Configuration.getInstance().setKnnPositionk(k);
+          //  Configuration.getInstance().setKnnDirectionk(k);
             DataSet<Tuple3<Integer, Double, Double>> scores = knn.solveKnn();
 //            Tools.expandTrainSet(scores, prepareData.getTestData(), prepareResult.getTestResult(),5243);
 //            Tools.removeTestData(scores, prepareData.getTestData(), prepareResult.getTestResult());
-//            Tuple3<Integer, Double, Double> avg = www.pyn.tools.Tools.calScoresAvg(scores);
-//            avgs.add(avg);
-        }
+            Tuple3<Integer, Double, Double> avg = www.pyn.tools.Tools.calScoresAvg(scores);
+            avgs.add(avg);
+      //  }
 
-//        for(int i = 0; i < avgs.size(); i++) {
-//            System.out.println(avgs.get(i).f0 + " " + avgs.get(i).f1 + " " + avgs.get(i).f2);
-//        }
+        for(int i = 0; i < avgs.size(); i++) {
+            System.out.println(avgs.get(i).f0 + " " + avgs.get(i).f1 + " " + avgs.get(i).f2);
+        }
 
         long endTime = System.currentTimeMillis();
         System.out.println("Prepare time: " + (prepareTime-startTime)*1.0/1000+"s");

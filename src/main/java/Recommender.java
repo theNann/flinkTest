@@ -16,6 +16,7 @@ public class Recommender {
 //    private static HashMap<Integer, Direction> trainDirection;
     private DataSet<PrimitiveData> testDataDS;
     private HashMap<Integer, PrimitiveData> testData;
+    private static HashMap<Integer, PrimitiveData> trainData;
 
     private static HashMap<Integer,Result> trainResult;
     private static HashMap<Integer,Result> testResult;
@@ -33,7 +34,7 @@ public class Recommender {
 //        trainDirection = prepareData.getTrainDirection();
         testDataDS = prepareData.getTestDataDS();
         testData = prepareData.getTestData();
-
+        trainData = prepareData.getTrainMapData();
         trainResult = prepareResult.getTrainResult();
         testResult = prepareResult.getTestResult();
     }
@@ -50,29 +51,29 @@ public class Recommender {
 
     public static final class recommenderMap implements FlatMapFunction<PrimitiveData, Result> {
         public void flatMap(PrimitiveData primitiveData, Collector<Result> collector) throws Exception {
-//            int k = Configuration.getInstance().getReck();
-//            int howMany = Configuration.getInstance().getRecHowMany();
-//            int maxK = 15;
-//            int dataId = primitiveData.getDataId();
-//            Position position = primitiveData.getPosition();
-//            Direction direction = primitiveData.getDirection();
-//            List<Integer> visibleObjList = new ArrayList<Integer>();
-//            visibleObjList.clear();
-//            //KNN
-//            List<SimilarityTuple> kNearestNeighbors = Tools.getNearestNeighbors(trainPosition, position, k,
-//                    1, maxK, trainDirection, direction);
-//            //CollaborativeFiltering
-//            for(int i = 0; i < kNearestNeighbors.size(); i++) {
-//                int simId = kNearestNeighbors.get(i).dataId;
-//                List<Integer> visibleObj = trainResult.get(simId).getVisibleObj();
-//                List<SimilarityTuple> recommendNearestNeighbors = Tools.userBasedRecommend(trainResult, visibleObj, howMany);
-//                for(int j = 0; j < recommendNearestNeighbors.size(); j++) {
-//                    int _simId = recommendNearestNeighbors.get(j).dataId;
-//                    List<Integer> _visibleObj = trainResult.get(_simId).getVisibleObj();
-//                    visibleObjList.addAll(_visibleObj);
-//                }
-//            }
-//            collector.collect(new Result(dataId, Tools.removeDuplicateFromList(visibleObjList)));
+            int k = Configuration.getInstance().getReck();
+            int howMany = Configuration.getInstance().getRecHowMany();
+            int maxK = 15;
+            int dataId = primitiveData.getDataId();
+            Position position = primitiveData.getPosition();
+            Direction direction = primitiveData.getDirection();
+            List<Integer> visibleObjList = new ArrayList<Integer>();
+            visibleObjList.clear();
+            //KNN
+            List<SimilarityTuple> kNearestNeighbors = Tools.getNearestNeighbors(trainData, position, direction,
+                    0, k, 15);
+            //CollaborativeFiltering
+            for(int i = 0; i < kNearestNeighbors.size(); i++) {
+                int simId = kNearestNeighbors.get(i).dataId;
+                List<Integer> visibleObj = trainResult.get(simId).getVisibleObj();
+                List<SimilarityTuple> recommendNearestNeighbors = Tools.userBasedRecommend(trainResult, visibleObj, howMany);
+                for(int j = 0; j < recommendNearestNeighbors.size(); j++) {
+                    int _simId = recommendNearestNeighbors.get(j).dataId;
+                    List<Integer> _visibleObj = trainResult.get(_simId).getVisibleObj();
+                    visibleObjList.addAll(_visibleObj);
+                }
+            }
+            collector.collect(new Result(dataId, Tools.removeDuplicateFromList(visibleObjList)));
         }
     }
 
