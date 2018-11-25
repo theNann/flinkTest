@@ -12,6 +12,7 @@ import www.pyn.bean.Result;
 import www.pyn.tools.Configuration;
 import www.pyn.tools.Tools;
 
+import java.awt.desktop.SystemSleepEvent;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,7 +51,8 @@ public class Main {
         };
 
         String[] trainTargetPath = {
-                "/home/pyn/Desktop/DataSet/GridData_20/train_target.dat",
+//                "/home/pyn/Desktop/DataSet/GridData_10/train_target.dat",
+                "/home/pyn/Desktop/DataSet/GridData_10/huff.dat",
 //                "/home/pyn/Desktop/DataSet/train_random/random.txt",
 //                "/home/pyn/Desktop/DataSet/train_random/target_train_1.txt"
         };
@@ -95,23 +97,29 @@ public class Main {
 
 //        DataSet<Tuple3<Integer, Double, Double>> scores = collaborativeFiltering.solveCollaborativeFiltering();
 //        recommender.solveRecommender();
-      //  for(int k = 7; k <= 7; k += 2)
-     //   {
+        for(int k = 5; k <= 5; k += 2)
+        {
 //            Configuration.getInstance().setReck(1);
 //            Configuration.getInstance().setRecHowMany(k);
 //            recommender.solveRecommender();
-//            Configuration.getInstance().setKnnPositionk(k);
-          //  Configuration.getInstance().setKnnDirectionk(k);
+            Configuration.getInstance().setKnnPositionk(k);
+            Configuration.getInstance().setKnnDirectionk(k);
             DataSet<Tuple3<Integer, Double, Double>> scores = knn.solveKnn();
 //            Tools.expandTrainSet(scores, prepareData.getTestData(), prepareResult.getTestResult(),5243);
 //            Tools.removeTestData(scores, prepareData.getTestData(), prepareResult.getTestResult());
             Tuple3<Integer, Double, Double> avg = www.pyn.tools.Tools.calScoresAvg(scores);
             avgs.add(avg);
-      //  }
+        }
 
         for(int i = 0; i < avgs.size(); i++) {
             System.out.println(avgs.get(i).f0 + " " + avgs.get(i).f1 + " " + avgs.get(i).f2);
         }
+//        List<Integer> raw = PrepareResult.getResultByCompress(122);
+//        for(int i = 0; i < raw.size(); i++) {
+//            System.out.print(raw.get(i) + ",");
+//        }
+//        System.out.println();
+//        System.out.println(raw.size());
 
         long endTime = System.currentTimeMillis();
         System.out.println("Prepare time: " + (prepareTime-startTime)*1.0/1000+"s");

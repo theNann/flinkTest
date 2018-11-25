@@ -8,9 +8,6 @@ import www.pyn.bean.*;
 import java.io.*;
 import java.util.*;
 
-/**
- * Created by pyn on 2018/4/18.
- */
 
 
 public class Tools {

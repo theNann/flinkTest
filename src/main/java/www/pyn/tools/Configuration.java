@@ -1,8 +1,6 @@
 package www.pyn.tools;
 
-/**
- * Created by pyn on 2018/6/11.
- */
+
 public class Configuration {
     private String ip;
     private int readPort;

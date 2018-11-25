@@ -3,6 +3,7 @@ import org.apache.flink.api.java.DataSet;
 import org.apache.flink.api.java.ExecutionEnvironment;
 import org.apache.flink.util.Collector;
 import www.pyn.bean.Result;
+import www.pyn.compress.Huffman;
 import www.pyn.tools.Configuration;
 
 import javax.print.attribute.ResolutionSyntax;
@@ -22,14 +23,17 @@ public class PrepareResult {
     private String[] trainFilePath;
     private String[] testFilePath;
     private static PrepareResult prepareResult = null;
-
+    private static Huffman huffman;
+    private static HashMap<Integer, List<Integer>> rawTrainResult;
     private PrepareResult(ExecutionEnvironment env) {
         this.env = env;
         this.trainFilePath = Configuration.getInstance().getTrainTargetPath();
         this.testFilePath = Configuration.getInstance().getTestTargetPath();
         trainResult = new HashMap<Integer, Result>();
         testResult = new HashMap<Integer, Result>();
-        readTrainResult();
+        rawTrainResult = new HashMap<Integer, List<Integer>>();
+//        readTrainResult();
+        readTrainResultByCompress();
         readTestResult();
     }
 
@@ -38,6 +42,20 @@ public class PrepareResult {
             prepareResult = new PrepareResult(env);
         }
         return prepareResult;
+    }
+
+    public void readTrainResultByCompress() {
+        huffman = new Huffman();
+        huffman.decode(trainFilePath[0]);
+    }
+
+    public static List<Integer> getResultByCompress(int dataId) {
+        if(rawTrainResult.containsKey(dataId)) {
+            return rawTrainResult.get(dataId);
+        }
+        List<Integer> raw = huffman.getLine(dataId);
+        rawTrainResult.put(dataId, raw);
+        return raw;
     }
 
     public void readTrainResult() {
@@ -51,17 +69,19 @@ public class PrepareResult {
             //        int cnt = -1;
             try {
                 dis = new DataInputStream(new FileInputStream(file));
-                byte[] byteDataId = new byte[4];
+                int dataId = 0;
+                byte[] byteSize = new byte[2];
                 while (true) {
                     //                if(++cnt == 5) {
                     //                    break;
                     //                }
-                    int res = dis.read(byteDataId, 0, 4);
+                    //dataId不存在二进制文件中，由逻辑处理
+                    int res = dis.read(byteSize, 0, 2);
                     if (res == -1) {
                         break;
                     }
-                    int dataId = ((byteDataId[0] & 0xff) << 24) | ((byteDataId[1] & 0xff) << 16) | ((byteDataId[2] & 0xff) << 8) | (byteDataId[3] & 0xff);
-                    int size = dis.readShort();
+                    int size = ((byteSize[0] & 0xff) << 8) | (byteSize[1] & 0xff);
+//                    int size = dis.readShort();
                     //                System.out.println("dataId , size : " + dataId + " , " + size) ;
                     //                System.out.print("dataId : " + dataId);
                     byte[] nums = new byte[size * 2];
@@ -74,7 +94,7 @@ public class PrepareResult {
                         //                    System.out.print(tmp + " ");
                     }
                     //                System.out.println();
-                    trainResult.put(dataId, new Result(dataId, visibleObj));
+                    trainResult.put(dataId, new Result(dataId++, visibleObj));
                 }
                 dis.close();
             } catch (Exception e) {

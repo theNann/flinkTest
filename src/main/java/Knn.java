@@ -69,8 +69,8 @@ public class Knn {
 //        System.out.println("testData size : " + testData.size());
 //        www.pyn.tools.Tools.expandTrainSet(scores, testData, testResult, 13674);
 
-//        scores.writeAsCsv(Configuration.getInstance().getKnnWriteToFile(),"\n",",", FileSystem.WriteMode.OVERWRITE)
-//                .setParallelism(1);
+        scores.writeAsCsv(Configuration.getInstance().getKnnWriteToFile(),"\n",",", FileSystem.WriteMode.OVERWRITE)
+                .setParallelism(1);
 
         try {
             env.execute("FlinkScores");
@@ -138,7 +138,8 @@ public class Knn {
 //            List<Integer> trainDataId = SceneInfo.nearestNeighbors2(gridX, gridY, gridZ, position, direction, 3);
             for(int i = 0; i < trainDataId.size(); i++) {
                 int id = trainDataId.get(i);
-                visibleObjList.addAll(trainResult.get(id).getVisibleObj());
+//                visibleObjList.addAll(trainResult.get(id).getVisibleObj());
+                visibleObjList.addAll(PrepareResult.getResultByCompress(id));
             }
             //优化后
 
